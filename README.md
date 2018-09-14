@@ -1,6 +1,6 @@
 # BananaApp-Server
 
-The PHP backend, see the inetrface and android app for further information.
+The PHP backend, see the interface and android app for further information.
 
 ## GUI endpoint
 
