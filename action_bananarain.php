@@ -20,7 +20,7 @@
 		$action->actionname = $name;
 		$action->status = $name . " ok";
 
-		/*$action->action_result = */persistBananaRain($jsonRQ);
+		/*$action->action_result = */persistBananaRain();
 
 		return json_encode($action/*, JSON_PRETTY_PRINT*/);
 	}

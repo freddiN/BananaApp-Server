@@ -83,8 +83,17 @@ if(guiShowSendBanana()) {
 	print "		<tr>\n";
 	print "			<td>Comment: </td>\n";
 	print "         <td><textarea name=\"comment\" style=\"width:100%;height:150px;\"></textarea></td>\n";
-	//print "			<td><input type=\"text\" name=\"comment\"/></td>\n";
 	print "		</tr>\n";
+    print "		<tr>\n";
+    print "			<td>Category: </td>\n";
+    print "         <td><select name=\"category\" id=\"category\">\n";
+    print "             <option>Other (performance related)</option>\n";
+    print "             <option>Work together better</option>\n";
+    print "             <option>Put the customer at the heart of all we do</option>\n";
+    print "             <option>Speed up and simplify</option>\n";
+    print "             <option>Explore and nurture new opportunities</option>\n";
+    print "         </select></select></td>\n";
+    print "		</tr>\n";
 	print "	</table>\n";
 	print "	<button type=\"submit\" name=\"submit-button-send\">Send banana!</button>\n";
 	print "</form>\n";
@@ -191,6 +200,7 @@ if(isset($_POST["submit-button-send"])){
 	$jsonRQ->action_request->to_user = htmlspecialchars($_POST["sendto"]);
 	$jsonRQ->action_request->banana_count = 1;
 	$jsonRQ->action_request->comment = htmlspecialchars($_POST["comment"]);
+    $jsonRQ->action_request->category = htmlspecialchars($_POST["category"]);
 
 	$response = json_decode(handleCreateTransaction($jsonRQ));
 
@@ -369,7 +379,7 @@ if(isset($_POST["submit-button-send"])){
 		
 		print "<table id=\"search_table\" rules=\"all\" frame=\"border\">\n";
 		print "  <tr align=\"center\" valign=\"top\">\n";
-		print "    <th>Timestamp</th><th id=\"sourceimage\">Source</th><th>From</th><th>To</th><th width=\"100%\">Comment</th>\n";
+		print "    <th>Timestamp</th><th id=\"sourceimage\">Source</th><th>From</th><th>To</th><th>Category</th><th width=\"100%\">Comment</th>\n";
 		print "  </tr>\n";
 		foreach ($response->action_result as &$result){
 			if ($self == $result->from_user || $self == $result->to_user || "Everyone" == $result->to_user) {
@@ -392,6 +402,7 @@ if(isset($_POST["submit-button-send"])){
 			
 			print "    <td style=\"white-space:nowrap;\">" . $result->from_user . "</td>\n";
 			print "    <td style=\"white-space:nowrap;\">" . $result->to_user . "</td>\n";
+            print "    <td style=\"white-space:nowrap;\">" . $result->category . "</td>\n";
 			print "    <td>\n"; 
 			
 			$diff = strtotime("now") - strtotime($result->timestamp);

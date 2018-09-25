@@ -7,8 +7,9 @@
 		public $bananacount = 0;
 		public $comment = "";
 		public $source = "";
+        public $category = "";
 		
-		function __construct($id, $timestamp, $from_user, $to_user, $count, $comment, $source) {
+		function __construct($id, $timestamp, $from_user, $to_user, $count, $comment, $source, $category) {
 			$this->id = $id;
 			$this->timestamp = $timestamp;
 			$this->from_user = $from_user;
@@ -16,6 +17,7 @@
 			$this->bananacount = intval($count);
 			$this->comment = $comment;
 			$this->source = $source;
+            $this->category = $category;
 		} 
 	}
 				

@@ -198,7 +198,8 @@
 				  AES_DECRYPT(to_user, ?) AS to_user,
 				  `banana_count`,
 				  AES_DECRYPT(comment, ?) AS comment,
-				  `source`
+				  `source`,
+				  `category`
 				FROM
 				  `Transactions`
 				  ORDER BY timestamp DESC
@@ -224,7 +225,7 @@
 	}
 	
 	// könnte man auch als mehrere Updates auf User oben machen, aber ich will alle Änderungen als einer durchgehende Transaktion haben
-	function mysqlBananaTransaction($from_id, $from_user, $from_spend_new, $to_id, $to_user, $banana_count, $comment, $timestamp, $source) {
+	function mysqlBananaTransaction($from_id, $from_user, $from_spend_new, $to_user, $banana_count, $comment, $timestamp, $source, $category) {
 		$result = -1;
 		
 		$cfg = parse_ini_file("config.ini.php", true);
@@ -237,9 +238,9 @@
 			$statement1 = $pdo->prepare("UPDATE `Users` SET bananas_to_spend = ? WHERE `id` = ?;");
 			$statement1->execute(array($from_spend_new, $from_id));
 
-			$statement2 = $pdo->prepare("INSERT INTO `Transactions` (`timestamp`, `from_user`, `to_user`, `banana_count`, `comment`, `source`)
-			VALUES(?, AES_ENCRYPT(?, ?), AES_ENCRYPT(?, ?), ?, AES_ENCRYPT(?, ?), ?);");
-			$statement2->execute(array($timestamp, $from_user, $encryptiondata["pass"], $to_user, $encryptiondata["pass"], $banana_count, $comment, $encryptiondata["pass"], $source));
+			$statement2 = $pdo->prepare("INSERT INTO `Transactions` (`timestamp`, `from_user`, `to_user`, `banana_count`, `comment`, `source`, `category`)
+			VALUES(?, AES_ENCRYPT(?, ?), AES_ENCRYPT(?, ?), ?, AES_ENCRYPT(?, ?), ?, ?);");
+			$statement2->execute(array($timestamp, $from_user, $encryptiondata["pass"], $to_user, $encryptiondata["pass"], $banana_count, $comment, $encryptiondata["pass"], $source, $category));
 
 			$result = $pdo->lastInsertId();
 

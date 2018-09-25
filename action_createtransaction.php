@@ -30,7 +30,7 @@
 			return generateError($name, "comment length must be between 3 and 500 characters");
 		}
 
-		$action->action_result = persistMoveBananas($user[0]->display_name, $jsonRQ->action_request->to_user, $jsonRQ->action_request->banana_count, $jsonRQ->action_request->comment, $jsonRQ->login->source);
+		$action->action_result = persistMoveBananas($user[0]->display_name, $jsonRQ->action_request->to_user, $jsonRQ->action_request->banana_count, $jsonRQ->action_request->comment, $jsonRQ->login->source, $jsonRQ->action_request->category);
 		if ($action->action_result == false) {
 			return generateError($name, "error generating transaction");
 		} 

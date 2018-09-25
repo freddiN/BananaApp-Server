@@ -116,7 +116,8 @@
 				$transaction["to_user"],
 				$transaction["banana_count"],
 				$transaction["comment"],
-				$transaction["source"]));
+				$transaction["source"],
+                $transaction["category"]));
 		}
 	
 		unset($mysqlTransactions);
@@ -166,13 +167,12 @@
 		return $transactiondetails;
 	}
 	
-	function persistMoveBananas($from, $to, $count, $comment, $source) {
+	function persistMoveBananas($from, $to, $count, $comment, $source, $category) {
 		$transaction_id = array();
 
 		$from_spend = -1;
 		$from_userid = -1;
-		$to_user_id = -1;
-		
+
 		// User finden
 		$users = persistGetUserList();
 		foreach ($users as $user) {
@@ -205,6 +205,11 @@
 			error_log("from user und to user identisch ");
 			return false;
 		}
+
+        if (!isset($category) || strlen(trim($category)) < 1) {
+            error_log("Kategorie fehlt");
+            return false;
+        }
 		
 		// doublebooking check
 		$pseudo_rq = new stdClass();
@@ -222,14 +227,14 @@
 
 		$from_spend -= intval($count);
 
-		array_push($transaction_id, mysqlBananaTransaction($from_userid, $from, $from_spend, $to_userid, $to, $count, $comment, date("Y-m-d H:i:s"), $source));
+		array_push($transaction_id, mysqlBananaTransaction($from_userid, $from, $from_spend, $to, $count, $comment, date("Y-m-d H:i:s"), $source, $category));
 		
 		persistSendMessage($from, $to, $comment, $transaction_id[0]);
 		
 		return $transaction_id;
 	}
 	
-	function persistBananaRain($jsonRQ) {
+	function persistBananaRain() {
 		
 		$cfg = parse_ini_file("config.ini.php", true);
 		$bananarain = $cfg["bananarain"];
