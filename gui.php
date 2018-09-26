@@ -87,11 +87,18 @@ if(guiShowSendBanana()) {
     print "		<tr>\n";
     print "			<td>Category: </td>\n";
     print "         <td><select name=\"category\" id=\"category\">\n";
-    print "             <option>Other (performance related)</option>\n";
-    print "             <option>Work together better</option>\n";
-    print "             <option>Put the customer at the heart of all we do</option>\n";
-    print "             <option>Speed up and simplify</option>\n";
-    print "             <option>Explore and nurture new opportunities</option>\n";
+
+    $cfg = parse_ini_file("config.ini.php", true);
+    $categories = $cfg["categories"];
+    $category_names = explode(":", $categories["names"]);
+    foreach ($category_names as $category) {
+        print "<option>" . $category ."</option>\n";
+    }
+
+    unset($cfg);
+    unset($categories);
+    unset($category_names);
+
     print "         </select></select></td>\n";
     print "		</tr>\n";
 	print "	</table>\n";

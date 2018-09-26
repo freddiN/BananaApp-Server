@@ -206,11 +206,11 @@
 			return false;
 		}
 
-        if (!isset($category) || strlen(trim($category)) < 1) {
-            error_log("Kategorie fehlt");
+        if (!isset($category) || strlen(trim($category)) < 1 || persistCheckCategoryAndErrorOccured($category)) {
+            error_log("category error");
             return false;
         }
-		
+
 		// doublebooking check
 		$pseudo_rq = new stdClass();
 		$pseudo_rq->action_request = new stdClass();
@@ -375,4 +375,24 @@
 		unset($months);
 		return $result;
 	}
+
+	function persistCheckCategoryAndErrorOccured($category) {
+		$cfg = parse_ini_file("config.ini.php", true);
+		$categories = $cfg["categories"];
+
+		if ($categories["required"] === "true") {
+			$category_names = explode(":", $categories["names"]);
+
+			foreach ($category_names as $cat_name) {
+				if ($category === $cat_name) {
+					return false;
+				}
+			}
+
+			error_log("category " . $category . " not in whitelist");
+			return true;
+		}
+
+    return false;
+}
 ?>
