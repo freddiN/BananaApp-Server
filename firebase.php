@@ -9,7 +9,7 @@
 		if (empty($notifications["firebase_url"]) || 
 			empty($notifications["firebase_key"]) || 
 			empty($notifications["topic"])) {
-			return;
+			return false;
 		}
 		
 		$data = array

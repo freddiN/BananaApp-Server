@@ -36,11 +36,11 @@
 			$statement = $pdo->prepare($update);
 			if ($statement->execute($array_bind_value)) {
 				$result = true;
-			} else {
+			}// else {
 				//echo "SQL Error <br />";
 				//echo "Query: " . $statement->queryString . "<br />\n";
 				//echo "errorInfo" . $statement->errorInfo() . "<br />\n";
-			}
+			//}
 			$statement->closeCursor();
 			$statement = null;
 			$pdo = null;
@@ -164,11 +164,11 @@
 				while($row = $statement->fetch(PDO::FETCH_ASSOC)) {
 					array_push($users, $row);
 				}
-			} else {
+			} //else {
 				//echo "SQL Error <br />";
 				//echo $statement->queryString."<br />";
 				//echo $statement->errorInfo();
-			}
+			//}
 			$statement->closeCursor();
 			$statement = null;
 			$pdo = null;
@@ -208,11 +208,11 @@
 				while($row = $statement->fetch(PDO::FETCH_ASSOC)) {
 					array_push($transactions, $row);
 				}
-			} else {
+			}// else {
 				//echo "SQL Error <br />";
 				//echo $statement->queryString."<br />";
 				//print_r($statement->errorInfo());
-			}
+			//}
 			$statement->closeCursor();
 			$statement = null;
 			$pdo = null;
@@ -340,11 +340,11 @@
 				while($row = $statement->fetch(PDO::FETCH_ASSOC)) {
 					array_push($month, $row);
 				}
-			} else {
+			}// else {
 				//echo "SQL Error <br />";
 				//echo $statement->queryString."<br />";
 				//echo $statement->errorInfo();
-			}
+			//}
 			$statement->closeCursor();
 			$statement = null;
 			$pdo = null;

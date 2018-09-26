@@ -340,7 +340,7 @@ if(isset($_POST["submit-button-send"])){
 			print "    <td>" . $result->bananas_received . "</td>\n";
 
 			if ($result->is_admin == "1") {
-				print "    <td align=\"center\"><img src=\"images/icon_crown.png\" id=\"crown_image\" alt=\"admin\" title=\"Admin\" alt=\"Admin\" height=\"18\"></td>\n";
+				print "    <td align=\"center\"><img src=\"images/icon_crown.png\" id=\"crown_image\" title=\"Admin\" alt=\"Admin\" height=\"18\"></td>\n";
 			} else {
 				print "    <td></td>\n";
 			}
@@ -480,6 +480,7 @@ if(isset($_POST["submit-button-send"])){
 	unset($_POST["token"]);
 	unset($_COOKIE["banana-app-token"]);
 } 
+
+print "</body>\n";
+print "</html>\n";
 ?>
-</body>
-</html>

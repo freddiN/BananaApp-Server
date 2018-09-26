@@ -66,7 +66,6 @@
 		$result = array();
 		$users = persistGetUserList();
 		foreach ($users as $useritem) {
-			$match = $useritem->login_token === $jsonRQ->login->token;
 			if ($useritem->login_token === $jsonRQ->login->token) {
 				array_push($result, mysqlUpdateUser($useritem->id, null, null, null, null, " ", " ", null));
 			}
@@ -76,7 +75,12 @@
 		return $result;
 	}
 	
-	/** in jeder Action aufgerufen */
+	/**
+	 * in jeder Action aufgerufen
+	 *
+	 * @param $jsonRQ
+	 * @return bool
+	 */
 	function persistIsTokenValid($jsonRQ) {
 		$result = false;
 		$users = persistGetUserList();

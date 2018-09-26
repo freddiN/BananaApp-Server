@@ -13,7 +13,7 @@
 		$user = persistGetAccountDetails($jsonRQ);
 		if (ldapLoginValid($jsonRQ) && $user[0]->is_admin == 1) {
 			print "<br>admin login successful, makin it rain ... <br>";
-			$result = makeItRain($_POST["bananacount"]);
+			$result = persistBananaRain();
 			print "<br>banana-rain result: " . $result . "<br>";
 		} else {
 			print "<br>admin login error, aborting ... <br>"; 

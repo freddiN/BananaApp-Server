@@ -10,7 +10,6 @@
 	}
 	
 	function ldapLoginValid($jsonRQ) {
-		$bRetun = false;
 		$user = $jsonRQ->login->user;
 		$pass = $jsonRQ->login->pass;
 
@@ -37,9 +36,9 @@
 			// Bindung überpfrüfen
 			if ($ldapbind) {
 				$rueckgabe = TRUE;
-			} else {
+			}// else {
 				//echo "LDAP bind fehlgeschlagen...<br>";
-			}
+			//}
 		}
 		
 		ldap_unbind($ldapconn);
