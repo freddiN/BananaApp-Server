@@ -37,6 +37,11 @@ defaultvalue=10
 magic_key=
 from=team_name
 
+[categories]
+required="false"
+names=""
+
+
 ;*/
 
 ;?>
