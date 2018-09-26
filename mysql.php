@@ -283,8 +283,8 @@
 			$statement1 = $pdo->prepare("UPDATE `Users` SET bananas_to_spend = ?;");
 			$statement1->execute(array($bananarain["defaultvalue"]));
 			
-			$statement2 = $pdo->prepare("INSERT INTO `Transactions` (`timestamp`, `from_user`, `to_user`, `banana_count`, `comment`, `source`)
-			VALUES(?, AES_ENCRYPT(?, ?), AES_ENCRYPT(?, ?), ?, AES_ENCRYPT(?, ?), ?);");
+			$statement2 = $pdo->prepare("INSERT INTO `Transactions` (`timestamp`, `from_user`, `to_user`, `banana_count`, `comment`, `source`, `category`)
+			VALUES(?, AES_ENCRYPT(?, ?), AES_ENCRYPT(?, ?), ?, AES_ENCRYPT(?, ?), ?, ``);");
 			$statement2->execute(array($timestamp, $from_user, $encryptiondata["pass"], $to_user, $encryptiondata["pass"], $bananarain["defaultvalue"], $comment, $encryptiondata["pass"], $source));
 
 			$result = $pdo->lastInsertId();
