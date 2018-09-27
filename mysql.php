@@ -118,11 +118,11 @@
 			$statement = $pdo->prepare($update);
 			if ($statement->execute($array_bind_value)) {
 				$result = true;
-			} else {
+			}// else {
 				//echo "SQL Error <br />";
 				//echo "Query: " . $statement->queryString . "<br />\n";
 				//echo "errorInfo" . $statement->errorInfo() . "<br />\n";
-			}
+			//}
 			$statement->closeCursor();
 			$statement = null;
 			$pdo = null;
