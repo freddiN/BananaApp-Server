@@ -250,7 +250,7 @@
 		
 		$result = mysqlBananaRain($from, "Everyone", "Here, have a fresh set of bananas!", date("Y-m-d H:i:s"), "rain");
 		
-		persistSendMessage($from, "Everyone", "Here, have a fresh set of bananas!", $result);
+		//persistSendMessage($from, "Everyone", "Here, have a fresh set of bananas!", $result);
 		
 		return ($result != -1);
 	}
