@@ -432,7 +432,7 @@ if(isset($_POST["submit-button-send"])){
 		print "  <br/>CSV <a href=\"csv_export.php?function=getTransactionsAsCSV\" target=\"_blank\">Export</a>\n";
 		print "<br/><br/>Archive:<br/>\n";
 		
-		$files = array_diff(scandir("archive"), array('.', '..'));
+		$files = array_diff(scandir("archive", SCANDIR_SORT_DESCENDING ), array('.', '..'));
 		foreach($files as $file) 
 		{
 			if (stristr($file, '.csv') === FALSE || stristr($file, 'transactions_') === FALSE) {
