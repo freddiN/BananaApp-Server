@@ -33,8 +33,8 @@
 		return (isset($_POST["top-button-transactionlist"]) || isset($_POST["submit-button-transactionlist"]));
 	}
 
-	function guiShowMakeItRain() {
-		return (isset($_POST["top-button-makeitrain"]) || isset($_POST["submit-button-makeitrain"]));
+	function guiShowAdmin() {
+		return (isset($_POST["top-button-admin"]) || isset($_POST["submit-button-makeitrain"]));
 	}
 
 	function guiShowSetup() {
@@ -59,6 +59,17 @@
 		$jsonRQ->login = new stdClass();
 		$jsonRQ->login->token = htmlspecialchars(guiFetchToken());
 		return json_decode(handleActionUserList($jsonRQ));
+	}
+	
+	function guiGetUserlist2($team_name) {
+		//print "guiGetUserlist2 START" . $team_name . "<br>";
+		$users = persistGetUserList($team_name);
+		censorData($users);
+		
+		//print_r($users);
+		//print "guiGetUserlist2 ENDE<br>";
+
+		return $users;
 	}
 
 	function guiPrintLogin($button_name, $button_text) {

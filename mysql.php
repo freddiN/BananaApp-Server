@@ -138,18 +138,21 @@
 		return $result;
 	}
 	
-	function mysqlSelectUsers() {
+	function mysqlSelectUsers($team_name="") {
 		$users = array();
 		
 		$cfg = parse_ini_file("config.ini.php", true);
 		$mysqldata = $cfg["mysql"];
 		$encryptiondata = $cfg["encryption"];
-
-		try {
-			$pdo = new PDO("mysql: host=" . $mysqldata["mysql_server"] . ";dbname=" . $mysqldata["mysql_db"], $mysqldata["mysql_user"], $mysqldata["mysql_pass"]);
-	 
-			$statement = $pdo->prepare(
-				"SELECT `id`, 
+		
+		$vars = array($encryptiondata["pass"], $encryptiondata["pass"], $encryptiondata["pass"]);
+		$where = "";
+		if (!empty($team_name)) {
+			$where = "having `team_name` = ?";	//supoorts alias instead of where
+			array_push($vars, $team_name);
+		}
+		
+		$select = "SELECT `id`, 
 				AES_DECRYPT(display_name, ?) as `display_name`,
 				AES_DECRYPT(ad_user, ?) as `ad_user`,
 				`is_admin`,
@@ -157,10 +160,18 @@
 				(Select count(*) from Transactions where to_user = display_name) as `bananas_received`,
 				`login_token`,
 				`token_expiration_timestamp`,
-				`token_duration`
-				FROM `Users` 
-				ORDER BY display_name ASC;");
-			if ($statement->execute(array($encryptiondata["pass"], $encryptiondata["pass"]))) {
+				`token_duration`,
+				AES_DECRYPT(team_name, ?) as `team_name` 
+				FROM `Users` " . $where . "
+				ORDER BY display_name ASC;";
+
+		//print("SELECT " . $select . "<br>");
+		try {
+			$pdo = new PDO("mysql: host=" . $mysqldata["mysql_server"] . ";dbname=" . $mysqldata["mysql_db"], $mysqldata["mysql_user"], $mysqldata["mysql_pass"]);
+	 
+			$statement = $pdo->prepare($select);
+
+			if ($statement->execute($vars)) {
 				while($row = $statement->fetch(PDO::FETCH_ASSOC)) {
 					array_push($users, $row);
 				}
@@ -178,6 +189,37 @@
 		}
 		
 		return $users;
+	}
+	
+	function mysqlSelectTeams() {
+		$teams = array();
+		
+		$cfg = parse_ini_file("config.ini.php", true);
+		$mysqldata = $cfg["mysql"];
+		$encryptiondata = $cfg["encryption"];
+
+		try {
+			$pdo = new PDO("mysql: host=" . $mysqldata["mysql_server"] . ";dbname=" . $mysqldata["mysql_db"], $mysqldata["mysql_user"], $mysqldata["mysql_pass"]);
+	 
+			$statement = $pdo->prepare("SELECT DISTINCT AES_DECRYPT(team_name, ?) as `team_name` FROM `Users` ORDER BY team_name ASC;");
+			if ($statement->execute(array($encryptiondata["pass"]))) {
+				while($row = $statement->fetch(PDO::FETCH_ASSOC)) {
+					array_push($teams, $row);
+				}
+			} //else {
+				//echo "SQL Error <br />";
+				//echo $statement->queryString."<br />";
+				//echo $statement->errorInfo();
+			//}
+			$statement->closeCursor();
+			$statement = null;
+			$pdo = null;
+		} catch (PDOException $e) {
+		   //echo "Error!: " . $e->getMessage() . "<br/>";
+		   //die();
+		}
+		
+		return $teams;
 	}
 	
 	function mysqlSelectTransactions($limit) {
@@ -199,12 +241,14 @@
 				  `banana_count`,
 				  AES_DECRYPT(comment, ?) AS comment,
 				  `source`,
-				  `category`
+				  `category`,
+				  (Select AES_DECRYPT(team_name, ?) from Users where Transactions.from_user = Users.display_name) as `from_user_team`,
+				  (Select AES_DECRYPT(team_name, ?) from Users where Transactions.to_user = Users.display_name) as `to_user_team`
 				FROM
 				  `Transactions`
 				  ORDER BY timestamp DESC
 				LIMIT 0, " . $limit . ";");
-			if ($statement->execute(array($encryptiondata["pass"], $encryptiondata["pass"], $encryptiondata["pass"]))) {
+			if ($statement->execute(array($encryptiondata["pass"], $encryptiondata["pass"], $encryptiondata["pass"], $encryptiondata["pass"], $encryptiondata["pass"]))) {
 				while($row = $statement->fetch(PDO::FETCH_ASSOC)) {
 					array_push($transactions, $row);
 				}
@@ -317,7 +361,7 @@
 
 		$month = array();
 		
-		if ($team == "booking") {
+		/*if ($team == "booking") {
 			$db = "BananaServer";
 		} else if ($team == "ngo") {
 			$db = "BananaServerNGO";
@@ -325,14 +369,14 @@
 			$db = "BananaServerGW";
 		} else {
 			return $month;
-		}
+		}*/
 		
 		$cfg = parse_ini_file("config.ini.php", true);
 		$mysqldata = $cfg["mysql"];
 		$encryptiondata = $cfg["encryption"];
 
 		try {
-			$pdo = new PDO("mysql: host=" . $mysqldata["mysql_server"] . ";dbname=" . $db, $mysqldata["mysql_user"], $mysqldata["mysql_pass"]);
+			$pdo = new PDO("mysql: host=" . $mysqldata["mysql_server"] . ";dbname=" . $mysqldata["mysql_db"], $mysqldata["mysql_user"], $mysqldata["mysql_pass"]);
 	 
 			$statement = $pdo->prepare(
 				"SELECT COUNT(*) as count, DATE_FORMAT(timestamp, '%Y') as year, DATE_FORMAT(timestamp, '%m') as month FROM Transactions where source != 'rain' GROUP BY DATE_FORMAT(timestamp, '%Y%m');");

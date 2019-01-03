@@ -14,7 +14,7 @@
 		$action->actionname = $name;
 		$action->status = $name . " ok";
 
-		$action->action_result = persistGetUserList();
+		$action->action_result = persistGetUserList("");
 		censorData($action->action_result);
 		return json_encode($action/*, JSON_PRETTY_PRINT*/);
 	}

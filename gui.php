@@ -19,6 +19,8 @@ include_once "action_userlist.php";
 include_once "action_edituser.php";
 include_once "action_edittransaction.php";
 
+//var_dump($_REQUEST);
+
 print "<html>\n";
 print "<head>\n";
 print "	<link rel=\"stylesheet\" type=\"text/css\" href=\"css/style_desktop.css\" media=\"screen and (min-width: 1024px)\"/>\n";
@@ -27,6 +29,7 @@ print "	<link rel=\"icon\" type=\"image/png\" href=\"images/favicon.png\"/>\n";
 print "	<title>Welcome to the Banana App</title>\n";
 print "	<script type=\"text/javascript\" src=\"js/qrcode.js\"></script>\n";
 print "	<script type=\"text/javascript\" src=\"js/tablesearch.js\"></script>\n";
+print "	<script type=\"text/javascript\" src=\"js/teamselect.js\"></script>\n";
 print "</head>\n";
 
 print "<body>\n";
@@ -39,7 +42,7 @@ print "			<button type=\"submit\" name=\"top-button-userlist\">Display Users</bu
 print "			<button type=\"submit\" name=\"top-button-transactionlist\">Display Transactions</button>\n";
 print "			<button type=\"submit\" name=\"top-button-stats\">Stats</button>\n";
 if (guiGetSelf("is_admin") == "1") {
-	print "			<button type=\"submit\" name=\"top-button-makeitrain\" style=\"background-color:Khaki\">Make It Rain</button>\n";
+	print "			<button type=\"submit\" name=\"top-button-admin\" style=\"background-color:Khaki\">Admin</button>\n";
 }
 print "			<button type=\"submit\" name=\"top-button-setup\" id=\"top-button-setup\" style=\"background-color:LightGreen\">Setup</button>\n";
 print "			<button type=\"submit\" name=\"top-button-login\" style=\"background-color:LightPink\">Login</button>\n";
@@ -62,16 +65,45 @@ if(guiShowSendBanana()) {
 	
 	if (guiHasToken()) {
 		$self = guiGetSelf("display_name");
-		$response = guiGetUserlist();
-		if($response->status == "get_user_list ok"){
-			print "<td><select name=\"sendto\" id=\"sendto\">\n";
-			print "<option>(please select)</option>\n";
-			foreach ($response->action_result as &$result){
-				if ($self != $result->display_name) {
-					print "<option>" . $result->display_name . "</option>\n";
+		$users = guiGetUserlist2("");
+		if(!empty($users)){
+			$teams = persistGetTeamList();
+			$allTeams = "select_AllUsers|";
+			foreach ($teams as &$team){
+				$allTeams .= "select_" . $team . "|";
+			}
+			
+			print "			<td>\n";
+			
+			print "			<select name=\"team_select\" id=\"team_select\" onChange=\"showSelect(this.value,'" . substr($allTeams, 0, -1) ."');\">\n";
+			print "			 <option value=\"select_AllUsers\">All users</option>\n";
+			foreach ($teams as &$team){
+				print "			 <option value=\"select_" . $team . "\">" . $team . "</option>\n";
+			}
+			print "			</select>\n\n";
+			
+			print "			<select name=\"sendto_select_AllUsers\" id=\"select_AllUsers\">\n";
+			print "			 <option>(please select)</option>\n";
+			foreach ($users as &$user){
+				if ($self != $user->display_name) {
+					print "			 <option>" . $user->display_name . "</option>\n";
 				}
 			}
-			print "</select></tr>\n";
+			print "			</select>\n";
+			
+			foreach ($teams as &$team){
+				$users_tmp = guiGetUserlist2($team);
+				print "			<select name=\"sendto_select_" . $team . "\" style=\"display:none\" id=\"select_" . $team . "\">\n";
+				print "			 <option>(please select)</option>\n";
+				foreach ($users_tmp as &$user_tmp){
+					if ($self != $user_tmp->display_name) {
+						print "			 <option>" . $user_tmp->display_name . "</option>\n";
+					}
+				}
+				print "			</select>\n";
+			}
+			
+			print "         </td>\n";
 		} else {
 			print "			<td><input type=\"text\" name=\"sendto\"/></td>\n";
 		}
@@ -81,25 +113,25 @@ if(guiShowSendBanana()) {
 
 	print "		</tr>\n";
 	print "		<tr>\n";
-	print "			<td>Comment: </td>\n";
-	print "         <td><textarea name=\"comment\" style=\"width:100%;height:150px;\"></textarea></td>\n";
+	print "       <td>Comment: </td>\n";
+	print "       <td><textarea name=\"comment\" style=\"width:100%;height:150px;\"></textarea></td>\n";
 	print "		</tr>\n";
     print "		<tr>\n";
-    print "			<td>Category: </td>\n";
-    print "         <td><select name=\"category\" id=\"category\">\n";
+    print "       <td>Category: </td>\n";
+    print "       <td><select name=\"category\" id=\"category\">\n";
 
     $cfg = parse_ini_file("config.ini.php", true);
     $categories = $cfg["categories"];
     $category_names = explode(":", $categories["names"]);
     foreach ($category_names as $category) {
-        print "<option>" . $category ."</option>\n";
+        print "          <option>" . $category ."</option>\n";
     }
 
     unset($cfg);
     unset($categories);
     unset($category_names);
 
-    print "         </select></select></td>\n";
+    print "         </select></td>\n";
     print "		</tr>\n";
 	print "	</table>\n";
 	print "	<button type=\"submit\" name=\"submit-button-send\">Send banana!</button>\n";
@@ -123,7 +155,7 @@ if(guiShowSendBanana()) {
 	} else {
 		guiPrintLogin("submit-button-transactionlist", "Show transactions!");
 	}
-} else if(guiShowMakeItRain()) {
+} else if(guiShowAdmin()) {
 	print "<p>\n";
 	print "<form name=\"banana-rain\" method=\"post\" action=\"\" style=\"background-color:Khaki\">\n";
 	print "	<h4>Make it rain!</h4>\n";
@@ -172,9 +204,7 @@ if(guiShowSendBanana()) {
 	if (guiHasToken()) {
 		print "<h3>Stats</h3>\n";
 		
-		guiPrintStatsForTeam("booking");
-		guiPrintStatsForTeam("ngo");
-		guiPrintStatsForTeam("gateway");
+		guiPrintStatsForTeam("PCC");
 	} else {
 		guiPrintLogin("", "Show stats!");
 	}
@@ -202,9 +232,15 @@ if(guiShowSendBanana()) {
 
 if(isset($_POST["submit-button-send"])){
 	print "<h3 id=\"action_header\">Send Banana</h3>\n";
+	
+	$sendTo = "";
+	$teamSelect = $_POST["team_select"];	//"select_Minion"
+	if ($_POST["sendto_" . $teamSelect] != "(please select)") {// "sendto_select_Minion"
+		$sendTo = $_POST["sendto_" . $teamSelect];
+	}
 
 	$jsonRQ = createBasicRequest("create_transaction");
-	$jsonRQ->action_request->to_user = htmlspecialchars($_POST["sendto"]);
+	$jsonRQ->action_request->to_user = htmlspecialchars($sendTo);
 	$jsonRQ->action_request->banana_count = 1;
 	$jsonRQ->action_request->comment = htmlspecialchars($_POST["comment"]);
     $jsonRQ->action_request->category = htmlspecialchars($_POST["category"]);
@@ -260,6 +296,10 @@ if(isset($_POST["submit-button-send"])){
 		print "		<tr>\n";
 		print "			<td>AD user: </td>\n";
 		print "			<td>" . $response->action_result[0]->ad_user . "</td>\n";
+		print "		</tr>\n";
+		print "		<tr>\n";
+		print "			<td>Team: </td>\n";
+		print "			<td>" . $response->action_result[0]->team_name . "</td>\n";
 		print "		</tr>\n";
 		print "		<tr>\n";
 		print "			<td>Bananas to spend: </td>\n";
@@ -320,11 +360,11 @@ if(isset($_POST["submit-button-send"])){
 	if($response->status == "get_user_list ok"){
 		$self = guiGetSelf("display_name");
 		
-		print "<input type=\"text\" id=\"search_input\" onkeyup=\"filterListUsers()\" placeholder=\"Search for names..\" title=\"Type in a name\"><br/><br/>\n";
+		print "<input type=\"text\" id=\"search_input\" onkeyup=\"filterListUsers()\" placeholder=\"Search for names...\" title=\"Type in a name\"><br/><br/>\n";
 		
 		print "<table id=\"search_table\" rules=\"all\" frame=\"border\">\n";
 		print "  <tr align=\"center\" valign=\"top\">\n";
-		print "    <th>Display name</th><th>Bananas to spend</th><th>Bananas received</th><th>Admin?</th>\n";
+		print "    <th>Display name</th><th>Team</th><th>Bananas to spend</th><th>Bananas received</th><th>Admin?</th>\n";
 		print "  </tr>\n";
 		$sum = 0;
 		foreach ($response->action_result as &$result){
@@ -336,6 +376,7 @@ if(isset($_POST["submit-button-send"])){
 			}
 			
 			print "    <td>" . $result->display_name . "</td>\n";
+			print "    <td>" . $result->team_name . "</td>\n";
 			print "	   <td><meter value=\"" . $result->bananas_to_spend . "\" min=\"0\" max=\"10\"></meter> " . $result->bananas_to_spend . "</td>\n";
 			print "    <td>" . $result->bananas_received . "</td>\n";
 
@@ -382,7 +423,8 @@ if(isset($_POST["submit-button-send"])){
 	if($response->status == "get_transaction_list ok"){
 		$self = guiGetSelf("display_name");
 		
-		print "<input type=\"text\" id=\"search_input\" onkeyup=\"filterListTransactions()\" placeholder=\"Search for names..\" title=\"Type in a name\"><br/><br/>\n";
+		print "<input type=\"text\" id=\"search_input\" onkeyup=\"filterListTransactions()\" placeholder=\"Search for names...\" title=\"Type in a username\">&nbsp;&nbsp;&nbsp;";
+		print "<input type=\"text\" id=\"search_input_teams\" onkeyup=\"filterListTeams()\" placeholder=\"Search for team...\" title=\"Type in a teamname\"><br/><br/>\n";
 		
 		print "<table id=\"search_table\" rules=\"all\" frame=\"border\">\n";
 		print "  <tr align=\"center\" valign=\"top\">\n";
@@ -410,7 +452,7 @@ if(isset($_POST["submit-button-send"])){
 			print "    <td style=\"white-space:nowrap;\">" . $result->from_user . "</td>\n";
 			print "    <td style=\"white-space:nowrap;\">" . $result->to_user . "</td>\n";
             print "    <td style=\"white-space:nowrap;\">" . $result->category . "</td>\n";
-			print "    <td>\n"; 
+			print "    <td>"; 
 			
 			$diff = strtotime("now") - strtotime($result->timestamp);
 			if ($result->from_user === $self && $diff < 3600) {	//oder Admin?
@@ -424,6 +466,7 @@ if(isset($_POST["submit-button-send"])){
 			}
 
 			print "</td>\n";
+			print "    <td style=\"display:none;\">" . $result->from_user_team . " " . $result->to_user_team . "</td>\n";
 			print "  </tr>\n";
 		}
 		print "</table>\n";
@@ -432,7 +475,7 @@ if(isset($_POST["submit-button-send"])){
 		print "  <br/>CSV <a href=\"csv_export.php?function=getTransactionsAsCSV\" target=\"_blank\">Export</a>\n";
 		print "<br/><br/>Archive:<br/>\n";
 		
-		$files = array_diff(scandir("archive", SCANDIR_SORT_DESCENDING ), array('.', '..'));
+		$files = array_diff(scandir("archive"), array('.', '..'));
 		foreach($files as $file) 
 		{
 			if (stristr($file, '.csv') === FALSE || stristr($file, 'transactions_') === FALSE) {

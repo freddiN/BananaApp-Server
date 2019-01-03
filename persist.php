@@ -7,7 +7,7 @@
 	function persistIsUserConfigured($jsonRQ) {
 		$bRetun = false;
 		
-		$users = persistGetUserList();
+		$users = persistGetUserList("");
 		foreach ($users as $useritem) {
 			if ($useritem->ad_user === $jsonRQ->login->user) {
 				$bRetun = true;
@@ -19,10 +19,10 @@
 		return $bRetun;
 	}
 	
-	function persistGetUserList() {
+	function persistGetUserList($team_name="") {
 		$users = array();
 		
-		$mysqlUsers = mysqlSelectUsers();
+		$mysqlUsers = mysqlSelectUsers($team_name);
 		foreach ($mysqlUsers as $user) {
 			array_push($users, new BananaActionUser(
 				$user["id"],
@@ -33,16 +33,29 @@
 				$user["bananas_received"],
 				$user["login_token"],
 				$user["token_expiration_timestamp"],
-				$user["token_duration"]));
+				$user["token_duration"],
+				$user["team_name"]));
 		}
 
 		unset($mysqlUsers);
 		return $users;
 	}
 	
+	function persistGetTeamList() {
+		$teams = array();
+		
+		$mysqlTeams = mysqlSelectTeams();
+		foreach ($mysqlTeams as $team) {
+			array_push($teams, $team["team_name"]);
+		}
+
+		unset($mysqlTeams);
+		return $teams;
+	}
+	
 	function persistLogin($jsonRQ) {
 		$result = array();
-		$users = persistGetUserList();
+		$users = persistGetUserList("");
 		foreach ($users as $useritem) {
 			if ($useritem->ad_user === $jsonRQ->login->user) {
 				$id = $useritem->id;
@@ -64,7 +77,7 @@
 	
 	function persistLogout($jsonRQ) {
 		$result = array();
-		$users = persistGetUserList();
+		$users = persistGetUserList("");
 		foreach ($users as $useritem) {
 			if ($useritem->login_token === $jsonRQ->login->token) {
 				array_push($result, mysqlUpdateUser($useritem->id, null, null, null, null, " ", " ", null));
@@ -83,7 +96,7 @@
 	 */
 	function persistIsTokenValid($jsonRQ) {
 		$result = false;
-		$users = persistGetUserList();
+		$users = persistGetUserList("");
 	
 		$now_dt = new DateTime(date("d.m.Y H:i:s"));
 		foreach ($users as $useritem) {
@@ -121,7 +134,9 @@
 				$transaction["banana_count"],
 				$transaction["comment"],
 				$transaction["source"],
-                $transaction["category"]));
+                $transaction["category"],
+				$transaction["from_user_team"],
+				$transaction["to_user_team"]));
 		}
 	
 		unset($mysqlTransactions);
@@ -130,7 +145,7 @@
 	
 	function persistGetAccountDetails($jsonRQ) {
 		$userdetails = array();
-		$users = persistGetUserList();
+		$users = persistGetUserList("");
 		foreach ($users as $useritem) {
 			if ($useritem->login_token === $jsonRQ->login->token) {
 				array_push($userdetails, $useritem);
@@ -144,7 +159,7 @@
 	
 	function persistIsUserAdmin($jsonRQ) {
 		$result = false;
-		$users = persistGetUserList();
+		$users = persistGetUserList("");
 		foreach ($users as $useritem) {
 			if ($useritem->login_token === $jsonRQ->login->token && 
 				$useritem->is_admin === 1) {
@@ -178,7 +193,7 @@
 		$from_userid = -1;
 
 		// User finden
-		$users = persistGetUserList();
+		$users = persistGetUserList("");
 		foreach ($users as $user) {
 			//echo $user->id . " " . $user->display_name . " " . $user->ad_user . " " . $user->bananas_to_spend . " " . $user->bananas_received . " " . $user->is_admin . "<br>\n";
 			if ($user->display_name === $from) {
@@ -218,7 +233,7 @@
 		// doublebooking check
 		$pseudo_rq = new stdClass();
 		$pseudo_rq->action_request = new stdClass();
-		$pseudo_rq->action_request->limit = 3;
+		$pseudo_rq->action_request->limit = 10;
 		$transactions = persistGetTransactionList($pseudo_rq);
 		foreach ($transactions as $transaction) {
 			if ($transaction->from_user === $from &&
@@ -288,7 +303,7 @@
 			$new_duration = intval($jsonRQ->action_request->token_duration);
 		}
 	
-		$users = persistGetUserList();
+		$users = persistGetUserList("");
 		foreach ($users as $useritem) {
 			if ($useritem->display_name === $jsonRQ->action_request->display_name) {
 				array_push($result, mysqlUpdateUser(

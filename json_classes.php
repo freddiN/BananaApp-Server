@@ -8,8 +8,10 @@
 		public $comment = "";
 		public $source = "";
         public $category = "";
+		public $from_user_team = "";
+		public $to_user_team = "";
 		
-		function __construct($id, $timestamp, $from_user, $to_user, $count, $comment, $source, $category) {
+		function __construct($id, $timestamp, $from_user, $to_user, $count, $comment, $source, $category, $from_team, $to_team) {
 			$this->id = $id;
 			$this->timestamp = $timestamp;
 			$this->from_user = $from_user;
@@ -18,6 +20,14 @@
 			$this->comment = $comment;
 			$this->source = $source;
             $this->category = $category;
+			$this->from_user_team = $from_team;
+			if (is_null($this->from_user_team)) {
+				$this->from_user_team = "";
+			}
+			$this->to_user_team = $to_team;
+			if (is_null($this->to_user_team)) {
+				$this->to_user_team = "";
+			}
 		} 
 	}
 				
@@ -31,8 +41,9 @@
 		public $login_token  = "";
 		public $token_expiration_timestamp  = "";
 		public $token_duration  = "";
+		public $team_name = "";
 		
-		function __construct($id, $display_name, $ad_user, $is_admin, $spend, $received, $token, $token_expiration, $token_duration) {
+		function __construct($id, $display_name, $ad_user, $is_admin, $spend, $received, $token, $token_expiration, $token_duration, $team_name) {
 			$this->id = intval($id);
 			$this->display_name = $display_name;
 			$this->ad_user = $ad_user;
@@ -42,6 +53,7 @@
 			$this->login_token = $token;
 			$this->token_expiration_timestamp = $token_expiration;
 			$this->token_duration = $token_duration;
+			$this->team_name = $team_name;
 		} 
 	}
 	
