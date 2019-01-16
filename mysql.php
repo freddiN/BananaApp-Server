@@ -56,6 +56,39 @@
 		return $result;
 	}
 	
+	function mysqlDeleteTransaction($id) {
+		$result = false;
+		
+		$cfg = parse_ini_file("config.ini.php", true);
+		$mysqldata = $cfg["mysql"];
+		$encryptiondata = $cfg["encryption"];
+		
+		try {
+			$pdo = new PDO("mysql: host=" . $mysqldata["mysql_server"] . ";dbname=" . $mysqldata["mysql_db"], $mysqldata["mysql_user"], $mysqldata["mysql_pass"]);
+	 
+			$statement = $pdo->prepare("DELETE from `Transactions` where id = ?;");
+			if ($statement->execute(array($id))) {
+				$result = true;
+			}// else {
+				//echo "SQL Error <br />";
+				//echo "Query: " . $statement->queryString . "<br />\n";
+				//echo "errorInfo" . $statement->errorInfo() . "<br />\n";
+			//}
+			$statement->closeCursor();
+			$statement = null;
+			$pdo = null;
+		} catch (PDOException $e) {
+		   //echo "Error!: " . $e->getMessage() . "<br/>";
+		   //die();
+		}
+		
+		unset($cfg);
+		unset($mysqldata);
+		unset($encryptiondata);
+		
+		return $result;
+	}
+	
 	function mysqlUpdateUser($id, $display_name, $ad_user, $is_admin, $bananas_to_spend, $login_token, $token_expiration_timestamp, $token_duration) {
 		$result = false;
 		
@@ -123,6 +156,100 @@
 				//echo "Query: " . $statement->queryString . "<br />\n";
 				//echo "errorInfo" . $statement->errorInfo() . "<br />\n";
 			//}
+			$statement->closeCursor();
+			$statement = null;
+			$pdo = null;
+		} catch (PDOException $e) {
+		   //echo "Error!: " . $e->getMessage() . "<br/>";
+		   //die();
+		}
+		
+		unset($cfg);
+		unset($mysqldata);
+		unset($encryptiondata);
+		
+		return $result;
+	}
+	
+	function mysqlInsertUser($display_name, $ad_user, $team_name, $is_admin, $bananas_to_spend, $login_token, $token_expiration_timestamp, $token_duration) {
+		$result = false;
+		
+		$cfg = parse_ini_file("config.ini.php", true);
+		$mysqldata = $cfg["mysql"];
+		$encryptiondata = $cfg["encryption"];
+		
+		$insert = "INSERT into `Users` (display_name, ad_user, is_admin, bananas_to_spend, login_token, token_expiration_timestamp, token_duration, team_name) ";
+		$insert .= " VALUES ";
+		$insert .= "(AES_ENCRYPT(?, ?), AES_ENCRYPT(?, ?), ?, ?, ?, ?, ?, AES_ENCRYPT(?, ?));";
+
+		$result = false;
+		try {
+			$pdo = new PDO("mysql: host=" . $mysqldata["mysql_server"] . ";dbname=" . $mysqldata["mysql_db"], $mysqldata["mysql_user"], $mysqldata["mysql_pass"]);
+	 
+			$statement = $pdo->prepare($insert);
+			
+			$data = array(
+				$display_name, $encryptiondata["pass"],
+				$ad_user, $encryptiondata["pass"],
+				$is_admin,
+				$bananas_to_spend,
+				$login_token,
+				$token_expiration_timestamp,
+				$token_duration,
+				$team_name, $encryptiondata["pass"]
+				);
+			if ($statement->execute($data)) {
+				$result = true;
+			} else {
+				//echo "SQL Error <br />";
+				//echo "Query: " . $statement->queryString . "<br />\n";
+				//echo "errorInfo:";
+				//print_r($statement->errorInfo());
+				//echo "<br />\n";
+			}
+			$statement->closeCursor();
+			$statement = null;
+			$pdo = null;
+		} catch (PDOException $e) {
+		   //echo "Error!: " . $e->getMessage() . "<br/>";
+		   //die();
+		}
+		
+		unset($cfg);
+		unset($mysqldata);
+		unset($encryptiondata);
+		
+		return $result;
+	}
+	
+	function mysqlDeleteUser($display_name, $team_name) {
+		$result = false;
+		
+		$cfg = parse_ini_file("config.ini.php", true);
+		$mysqldata = $cfg["mysql"];
+		$encryptiondata = $cfg["encryption"];
+
+		$delete = "DELETE FROM `Users` WHERE AES_DECRYPT(display_name, ?) = ? AND AES_DECRYPT(team_name, ?) = ?;";
+
+		$result = false;
+		try {
+			$pdo = new PDO("mysql: host=" . $mysqldata["mysql_server"] . ";dbname=" . $mysqldata["mysql_db"], $mysqldata["mysql_user"], $mysqldata["mysql_pass"]);
+	 
+			$statement = $pdo->prepare($delete);
+			
+			$data = array(
+				$encryptiondata["pass"], $display_name,
+				$encryptiondata["pass"], $team_name,
+				);
+			if ($statement->execute($data)) {
+				$result = true;
+			} else {
+				//echo "SQL Error <br />";
+				//echo "Query: " . $statement->queryString . "<br />\n";
+				//echo "errorInfo:";
+				//print_r($statement->errorInfo());
+				//echo "<br />\n";
+			}
 			$statement->closeCursor();
 			$statement = null;
 			$pdo = null;
@@ -398,5 +525,109 @@
 		}
 		
 		return $month;
+	}
+	
+	function mysqlAnonymizeTransactions($display_name) {
+		$result = false;
+		
+		$cfg = parse_ini_file("config.ini.php", true);
+		$mysqldata = $cfg["mysql"];
+		$encryptiondata = $cfg["encryption"];
+
+		$delete = "DELETE FROM `Users` WHERE AES_DECRYPT(display_name, ?) = ? AND AES_DECRYPT(team_name, ?) = ?;";
+		
+		$update1 = "UPDATE `Transactions` SET `from_user` = AES_ENCRYPT('(anonymized)', ?) WHERE AES_DECRYPT(from_user, ?) = ?";
+		$update2 = "UPDATE `Transactions` SET `to_user`   = AES_ENCRYPT('(anonymized)', ?) WHERE AES_DECRYPT(to_user, ?)   = ?";
+
+		$result = false;
+		try {
+			$pdo = new PDO("mysql: host=" . $mysqldata["mysql_server"] . ";dbname=" . $mysqldata["mysql_db"], $mysqldata["mysql_user"], $mysqldata["mysql_pass"]);
+	 
+			$data = array($encryptiondata["pass"], $encryptiondata["pass"], $display_name);
+	 
+			$statement = $pdo->prepare($update1);
+			$result1 = $statement->execute($data);
+			
+			$statement = $pdo->prepare($update2);
+			$result2 = $statement->execute($data);
+			
+			$result = $result1 && $result2;
+			
+			$statement->closeCursor();
+			$statement = null;
+			$pdo = null;
+		} catch (PDOException $e) {
+		   //echo "Error!: " . $e->getMessage() . "<br/>";
+		   //die();
+		}
+		
+		unset($cfg);
+		unset($mysqldata);
+		unset($encryptiondata);
+		
+		return $result;
+	}
+	
+	// könnte man auch als mehrere Updates auf User oben machen, aber ich will alle Änderungen als einer durchgehende Transaktion haben
+	function mysqlRevertTransaction($transaction_id) {
+		$result = false;
+
+		$cfg = parse_ini_file("config.ini.php", true);
+		$mysqldata = $cfg["mysql"];
+		$encryptiondata = $cfg["encryption"];
+
+		$pdo = new PDO("mysql: host=" . $mysqldata["mysql_server"] . ";dbname=" . $mysqldata["mysql_db"], $mysqldata["mysql_user"], $mysqldata["mysql_pass"]);
+		try {
+			$pdo->beginTransaction();
+			
+			
+			$statement = $pdo->prepare("SELECT AES_DECRYPT(from_user, ?) as from_user, source FROM Transactions where id = ?;");
+			if ($statement->execute(array($encryptiondata["pass"], $transaction_id))) {
+				$select_result = $statement->fetch(PDO::FETCH_ASSOC);
+				
+				$source = $select_result["source"];
+				if ($source == "rain") {
+					// don't revert banana rain
+					return false;
+				}
+				
+				$from_user = $select_result["from_user"];
+
+				$statement = $pdo->prepare("SELECT bananas_to_spend FROM Users where AES_DECRYPT(display_name, ?) = ?;");
+				if ($statement->execute(array($encryptiondata["pass"], $from_user))) {
+					$select_result = $statement->fetch(PDO::FETCH_ASSOC);
+					
+					$bananas_to_spend = $select_result["bananas_to_spend"];
+					$bananas_to_spend_inc = intVal($bananas_to_spend);
+					$bananas_to_spend_inc++;
+					
+					if ($bananas_to_spend_inc <= 10) {
+						$statement1 = $pdo->prepare("UPDATE `Users` SET bananas_to_spend = ? WHERE AES_DECRYPT(display_name, ?) = ?;");
+						$statement1->execute(array($bananas_to_spend_inc, $encryptiondata["pass"], $from_user));
+					}
+
+					$statement2 = $pdo->prepare("DELETE from `Transactions` WHERE id = ?;");
+					$statement2->execute(array($transaction_id));
+					$result = true;
+				}
+			}
+
+			$pdo->commit(); 
+
+		} catch (PDOException $e) {
+			$pdo->rollBack(); 
+			$result = -1;
+		   //echo "Error!: " . $e->getMessage() . "<br/>";
+		   //die();
+		}
+		
+		unset($cfg);
+		unset($mysqldata);
+		unset($encryptiondata);
+
+		$pdo = null;
+		unset($pdo);
+
+		return $result;
 	}
 ?>

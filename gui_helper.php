@@ -34,7 +34,13 @@
 	}
 
 	function guiShowAdmin() {
-		return (isset($_POST["top-button-admin"]) || isset($_POST["submit-button-makeitrain"]));
+		return (
+		isset($_POST["top-button-admin"]) || 
+		isset($_POST["submit-button-makeitrain"]) ||
+		isset($_POST["submit-button-admin-newuser"]) ||
+		isset($_POST["submit-button-admin-deleteuser"]) ||
+		isset($_POST["submit-button-admin-anonymizeuser"])
+		);
 	}
 
 	function guiShowSetup() {
@@ -62,12 +68,8 @@
 	}
 	
 	function guiGetUserlist2($team_name) {
-		//print "guiGetUserlist2 START" . $team_name . "<br>";
 		$users = persistGetUserList($team_name);
 		censorData($users);
-		
-		//print_r($users);
-		//print "guiGetUserlist2 ENDE<br>";
 
 		return $users;
 	}

@@ -412,6 +412,62 @@
 			return true;
 		}
 
-    return false;
-}
+		return false;
+	}
+	
+	function persistCreateUser($display_name, $ad_user, $team, $is_admin=0, $to_spend=10, $token_duration=168) {
+		if (empty($display_name)) {
+			return FALSE;
+		}
+		
+		if (empty($ad_user)) {
+			return FALSE;
+		}
+		
+		if (empty($team)) {
+			return FALSE;
+		}
+		
+		return mysqlInsertUser($display_name, $ad_user, $team, $is_admin, $to_spend, "", "", $token_duration);
+	}
+	
+	function persistDeleteUser($display_name, $team) {
+		if (empty($display_name)) {
+			return FALSE;
+		}
+		
+		if (empty($team)) {
+			return FALSE;
+		}
+		
+		return mysqlDeleteUser($display_name, $team);
+	}
+	
+	function persistAnonymizeTransactions($display_name, $team) {
+		if (empty($display_name)) {
+			return FALSE;
+		}
+		
+		if (empty($team)) {
+			return FALSE;
+		}
+		
+		return mysqlAnonymizeTransactions($display_name, $team);
+	}
+	
+	function persistDeleteTransaction($transaction_id) {
+		if (empty($transaction_id)) {
+			return FALSE;
+		}
+		
+		return mysqlDeleteTransaction($transaction_id);
+	}
+	
+	function persistRevertTransaction($transaction_id) {
+		if (empty($transaction_id)) {
+			return FALSE;
+		}
+		
+		return mysqlRevertTransaction($transaction_id);
+	}
 ?>

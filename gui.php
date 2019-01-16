@@ -157,6 +157,11 @@ if(guiShowSendBanana()) {
 	}
 } else if(guiShowAdmin()) {
 	print "<p>\n";
+	
+	print "<table width=\"70%\" border=\"2\" style=\"background-color:Khaki\">\n";
+	print "  <tr>\n";
+	print "    <td>\n";
+
 	print "<form name=\"banana-rain\" method=\"post\" action=\"\" style=\"background-color:Khaki\">\n";
 	print "	<h4>Make it rain!</h4>\n";
 	print "	<table id=\"loginTable\">\n";
@@ -166,8 +171,126 @@ if(guiShowSendBanana()) {
 	print "		</tr>\n";
 	print "	</table>\n";
 	print "	<button type=\"submit\" name=\"submit-button-makeitrain\" style=\"background-color:White\">Make it rain!</button>\n";
-	print "	<p>(Admins only)</p>\n";
 	print "</form>\n";
+	
+	print "    </td>\n";
+	print "    <td>\n";
+	
+	print "<form name=\"admin-newuser\" method=\"post\" action=\"\" style=\"background-color:Khaki\">\n";
+	print "	<h4>Add new user</h4>\n";
+	print "	<table id=\"loginTable\">\n";
+	print "		<tr>\n";
+	print "			<td>Token: </td>\n";
+	print "			<td><input type=\"text\" name=\"token\" value=\"". guiFetchToken() . "\"/></td>\n";
+	print "		</tr>\n";
+	print "		<tr>\n";
+	print "			<td>Display name: </td>\n";
+	print "			<td><input type=\"text\" name=\"displayname\" value=\"\"/></td>\n";
+	print "		</tr>\n";
+	print "		<tr>\n";
+	print "			<td>AD name: </td>\n";
+	print "			<td><input type=\"text\" name=\"aduser\" value=\"\"/></td>\n";
+	print "		</tr>\n";
+	print "		<tr>\n";
+	print "			<td>Team: </td>\n";
+	print "			<td><input type=\"text\" name=\"team\" value=\"\"/></td>\n";
+	print "		</tr>\n";
+	print "		<tr>\n";
+	print "			<td>is admin: </td>\n";
+	print "			<td><input type=\"checkbox\" name=\"isadmin\" value=\"\"/></td>\n";
+	print "		</tr>\n";
+	print "	</table>\n";
+	print "	<button type=\"submit\" name=\"submit-button-admin-newuser\" style=\"background-color:White\">Create</button>\n";
+	print "</form>\n";
+	
+	print "    </td>\n";
+	print "  </tr>\n";
+	print "  <tr>\n";
+	print "    <td>\n";
+	
+	print "<form name=\"admin-deleteuser\" method=\"post\" action=\"\" style=\"background-color:Khaki\">\n";
+	print "	<h4>Delete user</h4>\n";
+	print "	<table id=\"loginTable\">\n";
+	print "		<tr>\n";
+	print "			<td>Token: </td>\n";
+	print "			<td><input type=\"text\" name=\"token\" value=\"". guiFetchToken() . "\"/></td>\n";
+	print "		</tr>\n";
+	print "		<tr>\n";
+	print "			<td>Display name: </td>\n";
+	print "			<td><input type=\"text\" name=\"displayname\" value=\"\"/></td>\n";
+	print "		</tr>\n";
+	print "		<tr>\n";
+	print "			<td>Team: </td>\n";
+	print "			<td><input type=\"text\" name=\"team\" value=\"\"/></td>\n";
+	print "		</tr>\n";
+	print "	</table>\n";
+	print "	<button type=\"submit\" name=\"submit-button-admin-deleteuser\" style=\"background-color:White\">Delete</button>\n";
+	print "</form>\n";
+	
+	print "    </td>\n";
+	print "    <td>\n";
+	
+	print "<form name=\"admin-anonymizetransactions\" method=\"post\" action=\"\" style=\"background-color:Khaki\">\n";
+	print "	<h4>Anonymize transactions</h4>\n";
+	print "	<table id=\"loginTable\">\n";
+	print "		<tr>\n";
+	print "			<td>Token: </td>\n";
+	print "			<td><input type=\"text\" name=\"token\" value=\"". guiFetchToken() . "\"/></td>\n";
+	print "		</tr>\n";
+	print "		<tr>\n";
+	print "			<td>Display name: </td>\n";
+	print "			<td><input type=\"text\" name=\"displayname\" value=\"\"/></td>\n";
+	print "		</tr>\n";
+	print "		<tr>\n";
+	print "			<td>Team: </td>\n";
+	print "			<td><input type=\"text\" name=\"team\" value=\"\"/></td>\n";
+	print "		</tr>\n";
+	print "	</table>\n";
+	print "	<button type=\"submit\" name=\"submit-button-admin-anonymizetransactions\" style=\"background-color:White\">Anonymize</button>\n";
+	print "</form>\n";
+	
+	print "    </td>\n";
+	print "  </tr>\n";
+	print "  <tr>\n";
+	print "    <td>\n";
+	
+	print "<form name=\"admin-deletetransaction\" method=\"post\" action=\"\" style=\"background-color:Khaki\">\n";
+	print "	<h4>Delete transaction</h4>\n";
+	print "	<table id=\"loginTable\">\n";
+	print "		<tr>\n";
+	print "			<td>Token: </td>\n";
+	print "			<td><input type=\"text\" name=\"token\" value=\"". guiFetchToken() . "\"/></td>\n";
+	print "		</tr>\n";
+	print "		<tr>\n";
+	print "			<td>Transaction id: </td>\n";
+	print "			<td><input type=\"text\" name=\"transactionid\" value=\"\"/></td>\n";
+	print "		</tr>\n";
+	print "	</table>\n";
+	print "	<button type=\"submit\" name=\"submit-button-admin-deletetransaction\" style=\"background-color:White\">Delete</button>\n";
+	print "</form>\n";
+	
+	print "    </td>\n";
+	print "    <td>\n";
+	
+	print "<form name=\"admin-anonymizetransactions\" method=\"post\" action=\"\" style=\"background-color:Khaki\">\n";
+	print "	<h4>Revert transaction</h4>\n";
+	print "	<table id=\"loginTable\">\n";
+	print "		<tr>\n";
+	print "			<td>Token: </td>\n";
+	print "			<td><input type=\"text\" name=\"token\" value=\"". guiFetchToken() . "\"/></td>\n";
+	print "		</tr>\n";
+	print "		<tr>\n";
+	print "			<td>Transaction id: </td>\n";
+	print "			<td><input type=\"text\" name=\"transactionid\" value=\"\"/></td>\n";
+	print "		</tr>\n";
+	print "	</table>\n";
+	print "	<button type=\"submit\" name=\"submit-button-admin-reverttransaction\" style=\"background-color:White\">Revert</button>\n";
+	print "</form>\n";
+	
+	print "    </td>\n";
+	print "  </tr>\n";
+	print "</table>\n";
+
 	print "</p>\n";
 } else if(guiShowSetup()) {
 	print "<p>\n";
@@ -498,6 +621,106 @@ if(isset($_POST["submit-button-send"])){
 		print "<br><font color=\"green\"> banana-rain result: " . $response->status . "</font><br>\n";
 	} else {
 		print "<br><font color=\"red\"> admin login error, aborting ... </font><br>\n"; 
+	}
+} else if(isset($_POST["submit-button-admin-newuser"])){
+	print "<h3 id=\"action_header\">New User</h3>";
+
+	$jsonRQ = createBasicRequest("");
+	if (!persistIsTokenValid($jsonRQ)) {
+		print "<br><font color=\"red\"> token error, aborting ... </font><br>\n"; 
+		break;
+	}
+			
+	if (!persistIsUserAdmin($jsonRQ)) {
+		print "<br><font color=\"red\"> admin rights error, aborting ... </font><br>\n";
+		break;
+	}
+
+	$createOk = persistCreateUser($_POST["displayname"], $_POST["aduser"], $_POST["team"], isset($_POST["isadmin"]));
+	if($createOk == true){
+		print "<br><font color=\"green\"> Create-user result: ok</font><br>\n";
+	} else {
+		print "<br><font color=\"red\"> Create-user result: error </font><br>\n"; 
+	}
+} else if(isset($_POST["submit-button-admin-deleteuser"])){
+	print "<h3 id=\"action_header\">Delete User</h3>";
+
+	$jsonRQ = createBasicRequest("");
+	if (!persistIsTokenValid($jsonRQ)) {
+		print "<br><font color=\"red\"> token error, aborting ... </font><br>\n"; 
+		break;
+	}
+			
+	if (!persistIsUserAdmin($jsonRQ)) {
+		print "<br><font color=\"red\"> admin rights error, aborting ... </font><br>\n";
+		break;
+	}
+
+	$deleteOk = persistDeleteUser($_POST["displayname"], $_POST["team"]);
+	if($deleteOk == true){
+		print "<br><font color=\"green\"> Delete-user result: ok</font><br>\n";
+	} else {
+		print "<br><font color=\"red\"> Delete-user result: error </font><br>\n"; 
+	}
+} else if(isset($_POST["submit-button-admin-anonymizetransactions"])){
+	print "<h3 id=\"action_header\">Anonymize Transactions</h3>";
+
+	$jsonRQ = createBasicRequest("");
+	if (!persistIsTokenValid($jsonRQ)) {
+		print "<br><font color=\"red\"> token error, aborting ... </font><br>\n"; 
+		break;
+	}
+			
+	if (!persistIsUserAdmin($jsonRQ)) {
+		print "<br><font color=\"red\"> admin rights error, aborting ... </font><br>\n";
+		break;
+	}
+
+	$anonOk = persistAnonymizeTransactions($_POST["displayname"], $_POST["team"]);
+	if($anonOk == true){
+		print "<br><font color=\"green\"> Anonymize-user result: ok</font><br>\n";
+	} else {
+		print "<br><font color=\"red\"> Anonymize-user result: error </font><br>\n"; 
+	}
+} else if(isset($_POST["submit-button-admin-deletetransaction"])){
+	print "<h3 id=\"action_header\">Delete Transaction</h3>";
+
+	$jsonRQ = createBasicRequest("");
+	if (!persistIsTokenValid($jsonRQ)) {
+		print "<br><font color=\"red\"> token error, aborting ... </font><br>\n"; 
+		break;
+	}
+			
+	if (!persistIsUserAdmin($jsonRQ)) {
+		print "<br><font color=\"red\"> admin rights error, aborting ... </font><br>\n";
+		break;
+	}
+
+	$ok = persistDeleteTransaction($_POST["transactionid"]);
+	if($ok == true){
+		print "<br><font color=\"green\"> Delete-transaction result: ok</font><br>\n";
+	} else {
+		print "<br><font color=\"red\"> Delete-user transaction: error </font><br>\n"; 
+	}
+} else if(isset($_POST["submit-button-admin-reverttransaction"])){
+	print "<h3 id=\"action_header\">Revert Transaction</h3>";
+
+	$jsonRQ = createBasicRequest("");
+	if (!persistIsTokenValid($jsonRQ)) {
+		print "<br><font color=\"red\"> token error, aborting ... </font><br>\n"; 
+		break;
+	}
+			
+	if (!persistIsUserAdmin($jsonRQ)) {
+		print "<br><font color=\"red\"> admin rights error, aborting ... </font><br>\n";
+		break;
+	}
+
+	$ok = persistRevertTransaction($_POST["transactionid"]);
+	if($ok == true){
+		print "<br><font color=\"green\"> Revert-transaction result: ok</font><br>\n";
+	} else {
+		print "<br><font color=\"red\"> Revert-transaction result: error </font><br>\n"; 
 	}
 } else if(isset($_POST["submit-button-login"])) {
 	$jsonRQ = new stdClass();
