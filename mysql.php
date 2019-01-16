@@ -488,16 +488,6 @@
 
 		$month = array();
 		
-		/*if ($team == "booking") {
-			$db = "BananaServer";
-		} else if ($team == "ngo") {
-			$db = "BananaServerNGO";
-		} else if ($team == "gateway") {
-			$db = "BananaServerGW";
-		} else {
-			return $month;
-		}*/
-		
 		$cfg = parse_ini_file("config.ini.php", true);
 		$mysqldata = $cfg["mysql"];
 		$encryptiondata = $cfg["encryption"];
@@ -568,7 +558,6 @@
 		return $result;
 	}
 	
-	// könnte man auch als mehrere Updates auf User oben machen, aber ich will alle Änderungen als einer durchgehende Transaktion haben
 	function mysqlRevertTransaction($transaction_id) {
 		$result = false;
 

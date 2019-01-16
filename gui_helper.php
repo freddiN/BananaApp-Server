@@ -39,7 +39,10 @@
 		isset($_POST["submit-button-makeitrain"]) ||
 		isset($_POST["submit-button-admin-newuser"]) ||
 		isset($_POST["submit-button-admin-deleteuser"]) ||
-		isset($_POST["submit-button-admin-anonymizeuser"])
+		isset($_POST["submit-button-admin-deletetransaction"] ||
+		isset($_POST["submit-button-admin-reverttransaction"] ||
+		isset($_POST["submit-button-admin-anonymizeuser"]
+		)
 		);
 	}
 
