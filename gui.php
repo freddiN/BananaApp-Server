@@ -352,12 +352,11 @@ if(guiShowSendBanana()) {
 
 
 // Aktionen nachdem der jeweiligeSubmit Button gedrückt wurde
-
 if(isset($_POST["submit-button-send"])){
 	print "<h3 id=\"action_header\">Send Banana</h3>\n";
 	
 	$sendTo = "";
-	$teamSelect = $_POST["team_select"];	//"select_Minion"
+	$teamSelect = str_replace(' ', '_',$_POST["team_select"]);	//"select_Minion"
 	if ($_POST["sendto_" . $teamSelect] != "(please select)") {// "sendto_select_Minion"
 		$sendTo = $_POST["sendto_" . $teamSelect];
 	}
