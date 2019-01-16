@@ -623,103 +623,114 @@ if(isset($_POST["submit-button-send"])){
 	}
 } else if(isset($_POST["submit-button-admin-newuser"])){
 	print "<h3 id=\"action_header\">New User</h3>";
+	$ok = true;
 
 	$jsonRQ = createBasicRequest("");
 	if (!persistIsTokenValid($jsonRQ)) {
 		print "<br><font color=\"red\"> token error, aborting ... </font><br>\n"; 
-		break;
+		$ok = false;
 	}
 			
-	if (!persistIsUserAdmin($jsonRQ)) {
+	if ($ok == true && !persistIsUserAdmin($jsonRQ)) {
 		print "<br><font color=\"red\"> admin rights error, aborting ... </font><br>\n";
-		break;
+		$ok = false;
 	}
 
-	$createOk = persistCreateUser($_POST["displayname"], $_POST["aduser"], $_POST["team"], isset($_POST["isadmin"]));
-	if($createOk == true){
-		print "<br><font color=\"green\"> Create-user result: ok</font><br>\n";
-	} else {
-		print "<br><font color=\"red\"> Create-user result: error </font><br>\n"; 
+	if ($ok == true) {
+		$createOk = persistCreateUser($_POST["displayname"], $_POST["aduser"], $_POST["team"], isset($_POST["isadmin"]));
+		if($createOk == true){
+			print "<br><font color=\"green\"> Create-user result: ok</font><br>\n";
+		} else {
+			print "<br><font color=\"red\"> Create-user result: error </font><br>\n"; 
+		}
 	}
 } else if(isset($_POST["submit-button-admin-deleteuser"])){
 	print "<h3 id=\"action_header\">Delete User</h3>";
-
+	$ok = true;
 	$jsonRQ = createBasicRequest("");
 	if (!persistIsTokenValid($jsonRQ)) {
 		print "<br><font color=\"red\"> token error, aborting ... </font><br>\n"; 
-		break;
+		$ok = false;
 	}
 			
-	if (!persistIsUserAdmin($jsonRQ)) {
+	if ($of == true && !persistIsUserAdmin($jsonRQ)) {
 		print "<br><font color=\"red\"> admin rights error, aborting ... </font><br>\n";
-		break;
+		$ok = false;
 	}
 
-	$deleteOk = persistDeleteUser($_POST["displayname"], $_POST["team"]);
-	if($deleteOk == true){
-		print "<br><font color=\"green\"> Delete-user result: ok</font><br>\n";
-	} else {
-		print "<br><font color=\"red\"> Delete-user result: error </font><br>\n"; 
+	if ($ok == true) {
+		$deleteOk = persistDeleteUser($_POST["displayname"], $_POST["team"]);
+		if($deleteOk == true){
+			print "<br><font color=\"green\"> Delete-user result: ok</font><br>\n";
+		} else {
+			print "<br><font color=\"red\"> Delete-user result: error </font><br>\n"; 
+		}
 	}
 } else if(isset($_POST["submit-button-admin-anonymizetransactions"])){
 	print "<h3 id=\"action_header\">Anonymize Transactions</h3>";
-
+	$ok = true;
 	$jsonRQ = createBasicRequest("");
 	if (!persistIsTokenValid($jsonRQ)) {
 		print "<br><font color=\"red\"> token error, aborting ... </font><br>\n"; 
-		break;
+		$ok = false;
 	}
 			
 	if (!persistIsUserAdmin($jsonRQ)) {
 		print "<br><font color=\"red\"> admin rights error, aborting ... </font><br>\n";
-		break;
+		$ok = false;
 	}
-
-	$anonOk = persistAnonymizeTransactions($_POST["displayname"], $_POST["team"]);
-	if($anonOk == true){
-		print "<br><font color=\"green\"> Anonymize-user result: ok</font><br>\n";
-	} else {
-		print "<br><font color=\"red\"> Anonymize-user result: error </font><br>\n"; 
+	
+	if ($ok == true) {
+		$anonOk = persistAnonymizeTransactions($_POST["displayname"], $_POST["team"]);
+		if($anonOk == true){
+			print "<br><font color=\"green\"> Anonymize-user result: ok</font><br>\n";
+		} else {
+			print "<br><font color=\"red\"> Anonymize-user result: error </font><br>\n"; 
+		}
 	}
 } else if(isset($_POST["submit-button-admin-deletetransaction"])){
 	print "<h3 id=\"action_header\">Delete Transaction</h3>";
-
+	$ok = true;
 	$jsonRQ = createBasicRequest("");
 	if (!persistIsTokenValid($jsonRQ)) {
 		print "<br><font color=\"red\"> token error, aborting ... </font><br>\n"; 
-		break;
+		$ok = false;
 	}
 			
-	if (!persistIsUserAdmin($jsonRQ)) {
+	if ($ok == true && !persistIsUserAdmin($jsonRQ)) {
 		print "<br><font color=\"red\"> admin rights error, aborting ... </font><br>\n";
-		break;
+		$ok = false;
 	}
 
-	$ok = persistDeleteTransaction($_POST["transactionid"]);
-	if($ok == true){
-		print "<br><font color=\"green\"> Delete-transaction result: ok</font><br>\n";
-	} else {
-		print "<br><font color=\"red\"> Delete-user transaction: error </font><br>\n"; 
+	if ($ok == true) {
+		$ok = persistDeleteTransaction($_POST["transactionid"]);
+		if($ok == true){
+			print "<br><font color=\"green\"> Delete-transaction result: ok</font><br>\n";
+		} else {
+			print "<br><font color=\"red\"> Delete-user transaction: error </font><br>\n"; 
+		}
 	}
 } else if(isset($_POST["submit-button-admin-reverttransaction"])){
 	print "<h3 id=\"action_header\">Revert Transaction</h3>";
-
+	$ok = true;
 	$jsonRQ = createBasicRequest("");
 	if (!persistIsTokenValid($jsonRQ)) {
 		print "<br><font color=\"red\"> token error, aborting ... </font><br>\n"; 
-		break;
+		$ok = false;
 	}
 			
-	if (!persistIsUserAdmin($jsonRQ)) {
+	if ($ok == true && !persistIsUserAdmin($jsonRQ)) {
 		print "<br><font color=\"red\"> admin rights error, aborting ... </font><br>\n";
-		break;
+		$ok = false;
 	}
 
-	$ok = persistRevertTransaction($_POST["transactionid"]);
-	if($ok == true){
-		print "<br><font color=\"green\"> Revert-transaction result: ok</font><br>\n";
-	} else {
-		print "<br><font color=\"red\"> Revert-transaction result: error </font><br>\n"; 
+	if ($ok == true) {
+		$isok = persistRevertTransaction($_POST["transactionid"]);
+		if($isok == true){
+			print "<br><font color=\"green\"> Revert-transaction result: ok</font><br>\n";
+		} else {
+			print "<br><font color=\"red\"> Revert-transaction result: error </font><br>\n"; 
+		}
 	}
 } else if(isset($_POST["submit-button-login"])) {
 	$jsonRQ = new stdClass();
