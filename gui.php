@@ -38,7 +38,6 @@ print "	<p>\n";
 print "		<form name=\"send banana menu\" method=\"post\" action=\"\" style=\"border: 1px none black\">\n";
 print "			<button type=\"submit\" name=\"top-button-send\">Send Banana</button>\n";
 print "			<button type=\"submit\" name=\"top-button-account\">View Account</button>\n";
-print "			<button type=\"submit\" name=\"top-button-userlist\">Display Users</button>\n";
 print "			<button type=\"submit\" name=\"top-button-transactionlist\">Display Transactions</button>\n";
 print "			<button type=\"submit\" name=\"top-button-stats\">Stats</button>\n";
 if (guiGetSelf("is_admin") == "1") {
@@ -142,12 +141,6 @@ if(guiShowSendBanana()) {
 		$_POST["submit-button-account"] = "set";
 	} else {
 		guiPrintLogin("submit-button-account", "Show account details!");
-	}
-} else if(guiShowUserlist()) {
-	if (guiHasToken()) {
-		$_POST["submit-button-userlist"] = "set";
-	} else {
-		guiPrintLogin("submit-button-userlist", "Show user list!");
 	}
 } else if(guiShowTransactionlist()) {
 	if (guiHasToken()) {
@@ -471,55 +464,6 @@ if(isset($_POST["submit-button-send"])){
 		print "		</tr>\n";
 		print "  </table>\n";
 		print "		</form>\n";
-	} else {
-		print "<br><font color=\"red\"> Error: " . $response->status . " </font><br>\n";
-	}
-} else if(isset($_POST["submit-button-userlist"])){
-	print "<h3 id=\"action_header\">User List</h3>\n";
-
-	$response = json_decode(handleActionUserList(createBasicRequest("get_user_list")));
-
-	if($response->status == "get_user_list ok"){
-		$self = guiGetSelf("display_name");
-		
-		print "<input type=\"text\" id=\"search_input\" onkeyup=\"filterListUsers()\" placeholder=\"Search for names...\" title=\"Type in a name\"><br/><br/>\n";
-		
-		print "<table id=\"search_table\" rules=\"all\" frame=\"border\">\n";
-		print "  <tr align=\"center\" valign=\"top\">\n";
-		print "    <th>Display name</th><th>Team</th><th>Bananas to spend</th><th>Bananas received</th><th>Admin?</th>\n";
-		print "  </tr>\n";
-		$sum = 0;
-		foreach ($response->action_result as &$result){
-			$sum += intval($result->bananas_to_spend);
-			if ($self == $result->display_name) {
-				print "  <tr style=\"background-color:LightGoldenRodYellow\">\n";
-			} else {
-				print "  <tr>\n";
-			}
-			
-			print "    <td>" . $result->display_name . "</td>\n";
-			print "    <td>" . $result->team_name . "</td>\n";
-			print "	   <td><meter value=\"" . $result->bananas_to_spend . "\" min=\"0\" max=\"10\"></meter> " . $result->bananas_to_spend . "</td>\n";
-			print "    <td>" . $result->bananas_received . "</td>\n";
-
-			if ($result->is_admin == "1") {
-				print "    <td align=\"center\"><img src=\"images/icon_crown.png\" id=\"crown_image\" title=\"Admin\" alt=\"Admin\" height=\"18\"></td>\n";
-			} else {
-				print "    <td></td>\n";
-			}
-
-			print "  </tr>\n";
-		}
-		print "</table>\n";
-		
-		$max = count($response->action_result) * 10;
-		print "<br>Still available this month: <meter value=\"" . $sum . "\" min=\"0\" max=\"" . $max . "\"></meter> " . $sum . " / " . $max . "<br>";
-		
-		print "<p id=\"csvexport\">user count: " . count($response->action_result) . "\n";
-		print "<br/>CSV <a href=\"csv_export.php?function=getUsersAsCSV\" target=\"_blank\">Export</a>\n";
-		
-		print "</p>\n";
-		
 	} else {
 		print "<br><font color=\"red\"> Error: " . $response->status . " </font><br>\n";
 	}

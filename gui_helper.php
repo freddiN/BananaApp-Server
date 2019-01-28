@@ -25,10 +25,6 @@
 		return (isset($_POST["top-button-account"]) || isset($_POST["submit-button-account"]));
 	}
 
-	function guiShowUserlist() {
-		return (isset($_POST["top-button-userlist"]) || isset($_POST["submit-button-userlist"]));
-	}
-
 	function guiShowTransactionlist() {
 		return (isset($_POST["top-button-transactionlist"]) || isset($_POST["submit-button-transactionlist"]));
 	}
