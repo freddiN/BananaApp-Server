@@ -42,8 +42,9 @@
 		public $token_expiration_timestamp  = "";
 		public $token_duration  = "";
 		public $team_name = "";
+		public $visibility = 1;
 		
-		function __construct($id, $display_name, $ad_user, $is_admin, $spend, $received, $token, $token_expiration, $token_duration, $team_name) {
+		function __construct($id, $display_name, $ad_user, $is_admin, $spend, $received, $token, $token_expiration, $token_duration, $team_name, $visibility) {
 			$this->id = intval($id);
 			$this->display_name = $display_name;
 			$this->ad_user = $ad_user;
@@ -54,6 +55,7 @@
 			$this->token_expiration_timestamp = $token_expiration;
 			$this->token_duration = $token_duration;
 			$this->team_name = $team_name;
+			$this->visibility = $visibility;
 		} 
 	}
 	

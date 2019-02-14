@@ -89,7 +89,7 @@
 		return $result;
 	}
 	
-	function mysqlUpdateUser($id, $display_name, $ad_user, $is_admin, $bananas_to_spend, $login_token, $token_expiration_timestamp, $token_duration) {
+	function mysqlUpdateUser($id, $display_name, $ad_user, $is_admin, $bananas_to_spend, $login_token, $token_expiration_timestamp, $token_duration, $visibility) {
 		$result = false;
 		
 		$cfg = parse_ini_file("config.ini.php", true);
@@ -136,6 +136,11 @@
 			array_push($array_bind_value, $token_duration);
 		}
 		
+		if (isset($visibility) && is_numeric($visibility)) {
+			array_push($array_set, "visibility = ?");
+			array_push($array_bind_value, $visibility);
+		}
+		
 		$update = "UPDATE `Users` SET ";
 		for ($i = 0; $i < count($array_set); $i++) {
 			$update .= $array_set[$i];
@@ -151,10 +156,10 @@
 			$statement = $pdo->prepare($update);
 			if ($statement->execute($array_bind_value)) {
 				$result = true;
-			}// else {
-				//echo "SQL Error <br />";
-				//echo "Query: " . $statement->queryString . "<br />\n";
-				//echo "errorInfo" . $statement->errorInfo() . "<br />\n";
+			} //else {
+			//	echo "SQL Error <br />";
+			//	echo "Query: " . $statement->queryString . "<br />\n";
+			//	echo "errorInfo" . $statement->errorInfo() . "<br />\n";
 			//}
 			$statement->closeCursor();
 			$statement = null;
@@ -171,16 +176,16 @@
 		return $result;
 	}
 	
-	function mysqlInsertUser($display_name, $ad_user, $team_name, $is_admin, $bananas_to_spend, $login_token, $token_expiration_timestamp, $token_duration) {
+	function mysqlInsertUser($display_name, $ad_user, $team_name, $is_admin, $bananas_to_spend, $login_token, $token_expiration_timestamp, $token_duration, $visibility) {
 		$result = false;
 		
 		$cfg = parse_ini_file("config.ini.php", true);
 		$mysqldata = $cfg["mysql"];
 		$encryptiondata = $cfg["encryption"];
 		
-		$insert = "INSERT into `Users` (display_name, ad_user, is_admin, bananas_to_spend, login_token, token_expiration_timestamp, token_duration, team_name) ";
+		$insert = "INSERT into `Users` (display_name, ad_user, is_admin, bananas_to_spend, login_token, token_expiration_timestamp, token_duration, team_name, visibility) ";
 		$insert .= " VALUES ";
-		$insert .= "(AES_ENCRYPT(?, ?), AES_ENCRYPT(?, ?), ?, ?, ?, ?, ?, AES_ENCRYPT(?, ?));";
+		$insert .= "(AES_ENCRYPT(?, ?), AES_ENCRYPT(?, ?), ?, ?, ?, ?, ?, AES_ENCRYPT(?, ?), ?);";
 
 		$result = false;
 		try {
@@ -196,7 +201,7 @@
 				$login_token,
 				$token_expiration_timestamp,
 				$token_duration,
-				$team_name, $encryptiondata["pass"]
+				$team_name, $encryptiondata["pass"], $visibility
 				);
 			if ($statement->execute($data)) {
 				$result = true;
@@ -288,7 +293,8 @@
 				`login_token`,
 				`token_expiration_timestamp`,
 				`token_duration`,
-				AES_DECRYPT(team_name, ?) as `team_name` 
+				AES_DECRYPT(team_name, ?) as `team_name`,
+				`visibility` 
 				FROM `Users` " . $where . "
 				ORDER BY display_name ASC;";
 

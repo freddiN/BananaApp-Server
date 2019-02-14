@@ -34,7 +34,8 @@
 				$user["login_token"],
 				$user["token_expiration_timestamp"],
 				$user["token_duration"],
-				$user["team_name"]));
+				$user["team_name"],
+				$user["visibility"]));
 		}
 
 		unset($mysqlUsers);
@@ -64,7 +65,7 @@
 				$token = uuidSecure();
 				$new_time = date("d.m.Y H:i:s", strtotime(sprintf("+%d hours", intval($duration_in_hours))));
 
-				$success = mysqlUpdateUser($id , null, null, null, null, $token, $new_time, null);
+				$success = mysqlUpdateUser($id , null, null, null, null, $token, $new_time, null, null);
 				if ($success) {
 					array_push($result, new BananaLogin($token,$new_time));
 				}
@@ -80,7 +81,7 @@
 		$users = persistGetUserList("");
 		foreach ($users as $useritem) {
 			if ($useritem->login_token === $jsonRQ->login->token) {
-				array_push($result, mysqlUpdateUser($useritem->id, null, null, null, null, " ", " ", null));
+				array_push($result, mysqlUpdateUser($useritem->id, null, null, null, null, " ", " ", null, null));
 			}
 		}
 		
@@ -112,6 +113,58 @@
 		unset($users);
 		return $result;
 	}
+	
+	function persistGetUserdetailFromToken($token, $what) {
+		$result = "";
+		$users = persistGetUserList("");
+	
+		$now_dt = new DateTime(date("d.m.Y H:i:s"));
+		foreach ($users as $useritem) {
+			$expire_dt = new DateTime($useritem->token_expiration_timestamp, new DateTimeZone("Europe/Berlin"));
+
+			if (isset($token) && $useritem->login_token === $token && $now_dt < $expire_dt) {
+				if ($what == "display_name") {
+					$result = $useritem->display_name;
+				} else if ($what == "visibility") {
+					$result = $useritem->visibility;
+				}
+			}
+		}
+		
+		unset($users);
+		return $result;
+	}
+	
+	function persistGetUserdetailFromUsername($display_name, $what) {
+		$result = "";
+		$users = persistGetUserList("");
+	
+		$now_dt = new DateTime(date("d.m.Y H:i:s"));
+		foreach ($users as $useritem) {
+			if ($useritem->display_name === $display_name) {
+				if ($what == "id") {
+					$result = $useritem->id;
+				} else if ($what == "ad_user") {
+					$result = $useritem->ad_user;
+				} else if ($what == "is_admin") {
+					$result = $useritem->is_admin;
+				} else if ($what == "login_token") {
+					$result = $useritem->login_token;
+				} else if ($what == "token_expiration_timestamp") {
+					$result = $useritem->token_expiration_timestamp;
+				} else if ($what == "token_duration") {
+					$result = $useritem->token_duration;
+				} else if ($what == "team_name") {
+					$result = $useritem->team_name;
+				} else if ($what == "visibility") {
+					$result = $useritem->visibility;
+				} 
+			}
+		}
+		
+		unset($users);
+		return $result;
+	}
 
 	function persistGetTransactionList($jsonRQ) {
 		$transactions = array();
@@ -124,19 +177,58 @@
 			}
 		}
 		
+		$check_visibility = false;
+		if (isset($jsonRQ->action_request->check_visibility)) {
+			$check_visibility = ($jsonRQ->action_request->check_visibility === "true");
+		}
+		
+		$localUsername = persistGetUserdetailFromToken($jsonRQ->login->token, "display_name");
+
 		$mysqlTransactions = mysqlSelectTransactions($limit);
 		foreach ($mysqlTransactions as $transaction) {
-			array_push($transactions, new BananaActionTransaction(
-				$transaction["id"],
-				$transaction["timestamp"],
-				$transaction["from_user"],
-				$transaction["to_user"],
-				$transaction["banana_count"],
-				$transaction["comment"],
-				$transaction["source"],
-                $transaction["category"],
-				$transaction["from_user_team"],
-				$transaction["to_user_team"]));
+			if ($check_visibility == true) {
+				$to_user = $transaction["to_user"];
+				$visibility_of_to_user = persistGetUserdetailFromUsername($to_user, "visibility");		
+	
+				if ($localUsername != $transaction["from_user"] && $to_user != $localUsername && $visibility_of_to_user == "0") {
+					array_push($transactions, new BananaActionTransaction(
+						$transaction["id"],
+						$transaction["timestamp"],
+						$transaction["from_user"],
+						"(anonymized)",
+						$transaction["banana_count"],
+						$transaction["comment"],
+						$transaction["source"],
+						$transaction["category"],
+						$transaction["from_user_team"],
+						$transaction["to_user_team"]));
+				} else {
+					array_push($transactions, new BananaActionTransaction(
+					$transaction["id"],
+					$transaction["timestamp"],
+					$transaction["from_user"],
+					$transaction["to_user"],
+					$transaction["banana_count"],
+					$transaction["comment"],
+					$transaction["source"],
+					$transaction["category"],
+					$transaction["from_user_team"],
+					$transaction["to_user_team"]));
+				}	
+					
+			} else {
+				array_push($transactions, new BananaActionTransaction(
+					$transaction["id"],
+					$transaction["timestamp"],
+					$transaction["from_user"],
+					$transaction["to_user"],
+					$transaction["banana_count"],
+					$transaction["comment"],
+					$transaction["source"],
+					$transaction["category"],
+					$transaction["from_user_team"],
+					$transaction["to_user_team"]));
+			}
 		}
 	
 		unset($mysqlTransactions);
@@ -254,7 +346,6 @@
 	}
 	
 	function persistBananaRain() {
-		
 		$cfg = parse_ini_file("config.ini.php", true);
 		$bananarain = $cfg["bananarain"];
 		
@@ -302,7 +393,12 @@
 		if (!empty($jsonRQ->action_request->token_duration) && is_numeric($jsonRQ->action_request->token_duration)) {
 			$new_duration = intval($jsonRQ->action_request->token_duration);
 		}
-	
+		
+		$new_visibility = "";
+		if (is_numeric($jsonRQ->action_request->visibility)) {
+			$new_visibility = intval($jsonRQ->action_request->visibility);
+		}
+		
 		$users = persistGetUserList("");
 		foreach ($users as $useritem) {
 			if ($useritem->display_name === $jsonRQ->action_request->display_name) {
@@ -314,7 +410,8 @@
 					$new_spend,
 					$new_token, 
 					$new_token_expiration, 
-					$new_duration));
+					$new_duration,
+					$new_visibility));
 				break;
 			}
 		}
@@ -414,8 +511,8 @@
 
 		return false;
 	}
-	
-	function persistCreateUser($display_name, $ad_user, $team, $is_admin=0, $to_spend=10, $token_duration=168) {
+
+	function persistCreateUser($display_name, $ad_user, $team, $is_admin=0, $to_spend=10, $token_duration=168, $visibility=1) {
 		if (empty($display_name)) {
 			return FALSE;
 		}
@@ -428,7 +525,11 @@
 			return FALSE;
 		}
 		
-		return mysqlInsertUser($display_name, $ad_user, $team, $is_admin, $to_spend, "", "", $token_duration);
+		if ($visibility < 0 || $visibility > 1) {
+			return FALSE;
+		}
+		
+		return mysqlInsertUser($display_name, $ad_user, $team, $is_admin, $to_spend, "", "", $token_duration, $visibility);
 	}
 	
 	function persistDeleteUser($display_name, $team) {

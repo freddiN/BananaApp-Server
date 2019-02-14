@@ -192,6 +192,10 @@ if(guiShowSendBanana()) {
 	print "			<td>is admin: </td>\n";
 	print "			<td><input type=\"checkbox\" name=\"isadmin\" value=\"\"/></td>\n";
 	print "		</tr>\n";
+	print "		<tr>\n";
+	print "			<td>Visibility: </td>\n";
+	print "			<td><input type=\"text\" name=\"visibility\" value=\"0\" size=\"5\"/> (0=hidden, 1=visible)</td>\n";
+	print "		</tr>\n";
 	print "	</table>\n";
 	print "	<button type=\"submit\" name=\"submit-button-admin-newuser\" style=\"background-color:White\">Create</button>\n";
 	print "</form>\n";
@@ -384,11 +388,12 @@ if(isset($_POST["submit-button-send"])){
 	}
 } else if(isset($_POST["submit-button-account"])){
 	print "<h3 id=\"action_header\">Account Details</h3>\n";
-	
+
 	if (isset($_POST["new_duration"])) {
 		$json_edit_user = createBasicRequest("edit_user");
 		$json_edit_user->action_request->display_name = guiGetSelf("display_name");
 		$json_edit_user->action_request->token_duration = htmlspecialchars($_POST["new_duration"]);
+		$json_edit_user->action_request->visibility = htmlspecialchars($_POST["new_visibility"]);
 
 		$response = json_decode(handleActionEditUser($json_edit_user));
 		
@@ -400,7 +405,6 @@ if(isset($_POST["submit-button-send"])){
 	}
 
 	$response = json_decode(handleActionAccountDetails(createBasicRequest("get_account_details")));
-
 	if($response->status == "login ok"){
 		print "<form name=\"send account update\" method=\"post\" action=\"\">";
 		print "	<table id=\"accountTable\">\n";
@@ -462,6 +466,27 @@ if(isset($_POST["submit-button-send"])){
 		print "			<td>User id: </td>\n";
 		print "			<td>" . $response->action_result[0]->id . "</td>\n";
 		print "		</tr>\n";
+		print "		<tr>\n";
+		print "			<td>Visibility: </td>\n";
+		print "			<td>\n";
+		print "			  <select name=\"new_visibility\">\n";
+		
+		if ($response->action_result[0]->visibility == "0") {
+			$select0 = "selected ";
+			$select1 = "";
+		} else if ($response->action_result[0]->visibility == "1") {
+			$select0 = "";
+			$select1 = "selected ";
+		}
+		
+		print "			    <option " . $select0 . "value=\"0\">Hidden</option>\n";
+		print "			    <option " . $select1 . "value=\"1\">Visible</option>\n";
+		print "			  </select>\n";
+		//print "			<td>\n";
+		//print "               <input type=\"number\" style=\"width:3em\"  min=\"0\" max=\"1\" name=\"new_visibility\" value=\"" . $response->action_result[0]->visibility . "\"/> ";
+		print "				  &nbsp;&nbsp;&nbsp;<button type=\"submit\" name=\"submit-button-account\">Update</button>\n";
+		print "         </td>\n";
+		print "		</tr>\n";
 		print "  </table>\n";
 		print "		</form>\n";
 	} else {
@@ -484,7 +509,9 @@ if(isset($_POST["submit-button-send"])){
 		}
 	}
 
-	$response = json_decode(handleTransactionList(createBasicRequest("get_transaction_list")));
+	$json_get_transactionlist = createBasicRequest("get_transaction_list");
+	$json_get_transactionlist->action_request->check_visibility = "true";
+	$response = json_decode(handleTransactionList($json_get_transactionlist));
 
 	if($response->status == "get_transaction_list ok"){
 		$self = guiGetSelf("display_name");
@@ -581,7 +608,7 @@ if(isset($_POST["submit-button-send"])){
 	}
 
 	if ($ok == true) {
-		$createOk = persistCreateUser($_POST["displayname"], $_POST["aduser"], $_POST["team"], isset($_POST["isadmin"]));
+		$createOk = persistCreateUser($_POST["displayname"], $_POST["aduser"], $_POST["team"], isset($_POST["isadmin"]), 10, 168, intval($_POST["visibility"]));
 		if($createOk == true){
 			print "<br><font color=\"green\"> Create-user result: ok</font><br>\n";
 		} else {
@@ -597,7 +624,7 @@ if(isset($_POST["submit-button-send"])){
 		$ok = false;
 	}
 			
-	if ($of == true && !persistIsUserAdmin($jsonRQ)) {
+	if ($ok == true && !persistIsUserAdmin($jsonRQ)) {
 		print "<br><font color=\"red\"> admin rights error, aborting ... </font><br>\n";
 		$ok = false;
 	}
@@ -611,7 +638,7 @@ if(isset($_POST["submit-button-send"])){
 		}
 	}
 } else if(isset($_POST["submit-button-admin-anonymizetransactions"])){
-	print "<h3 id=\"action_header\">Anonymize Transactions</h3>";
+	print "<h3 id=\"action_header\">Anonymize Transactions for user</h3>";
 	$ok = true;
 	$jsonRQ = createBasicRequest("");
 	if (!persistIsTokenValid($jsonRQ)) {
