@@ -2,18 +2,30 @@
 	# Quelle: https://stackoverflow.com/questions/4249432/export-to-csv-via-php
 	# http://blog.next-motion.de/2010/07/17/umlaute-in-csv-export-per-php-zeichensatzkonvertierung/
 	
-	include_once "mysql.php";
+	include_once "persist.php";
 	
 	$selection = htmlspecialchars($_GET["function"]);
 	if ($selection == "getTransactionsAsCSV") {
 		download_send_headers("transactions_" . date("d-m-Y-H:i:s") . ".csv");
-		echo array2csv(mysqlSelectTransactions(100000));
+		
+		$transactions = array();
+		$mysqlTransactions = mysqlSelectTransactions(100000);
+		foreach ($mysqlTransactions as $transaction) {
+			$visibility_of_to_user = persistGetUserdetailFromUsername($transaction["to_user"], "visibility");		
+
+			if ($visibility_of_to_user == "0") {
+				$transaction["to_user"] = "(anonymized)";
+			} 
+			array_push($transactions, $transaction);
+		}
+
+		echo array2csv($transactions);
 		die;
-	} else if ($selection == "getUsersAsCSV") {
+	} /*else if ($selection == "getUsersAsCSV") {
 		download_send_headers("users_" . date("d-m-Y-H:i:s") . ".csv");
 		echo array2csv(mysqlSelectUsers());
 		die;
-	}
+	}*/
 	
 	function download_send_headers($filename) {
 		// disable caching
