@@ -332,7 +332,7 @@ if(guiShowSendBanana()) {
 	print "<p>\n";
 	print "<form name=\"banana_rain\" method=\"post\">\n";
 	print "			<table id=\"loginTable\">\n";
-	print "				<tr><td>AD Username:</td><td><input type=\"text\" name=\"login\"/></td></tr>\n";
+	print "				<tr><td>AD Username:</td><td><input type=\"text\" name=\"login\" placeholder=\"firstname.lastname\"/></td></tr>\n";
 	print "				<tr><td>AD Password:</td><td><input type=\"password\" name=\"password\"/></td></tr>\n";
 	print "			</table>\n";
 	print "			<button type=\"submit\" name=\"submit-button-login\">Login</button>\n";
@@ -706,7 +706,14 @@ if(isset($_POST["submit-button-send"])){
 } else if(isset($_POST["submit-button-login"])) {
 	$jsonRQ = new stdClass();
 	$jsonRQ->login = new stdClass();
-	$user = $jsonRQ->login->user = htmlspecialchars($_POST["login"]);
+	
+	$user = htmlspecialchars($_POST["login"]);
+	if (strpos($user, '@') !== false) {
+		$user_arr = explode("@", $user);
+		$user = $user_arr[0];
+	}
+
+	$user = $jsonRQ->login->user = $user;
 	$pass = $jsonRQ->login->pass = $_POST["password"];
   
 	$result_json = json_decode(handleActionLogin($jsonRQ));
