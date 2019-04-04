@@ -13,8 +13,10 @@ mysql_timeout_seconds="5"
 pass=""
 
 [ldap]
-ldap_server=""
-ldap_user_postfix="@domain.de"
+ldap_server_tt="ldap://"
+ldap_user_postfix_tt="@domain.int"
+ldap_server_ama="ldaps://"
+ldap_user_postfix_ama="@domain2.net"
 
 [qrcode_setup]
 server=
