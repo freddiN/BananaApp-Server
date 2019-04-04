@@ -21,7 +21,31 @@
 
 		echo array2csv($transactions);
 		die;
-	} /*else if ($selection == "getUsersAsCSV") {
+	} else if ($selection == "getTransactionsAsCSVanonymized") {
+		download_send_headers("transactions_" . date("d-m-Y-H:i:s") . ".csv");
+		
+		$transactions = array();
+		$mysqlTransactions = mysqlSelectTransactions(100000);
+		foreach ($mysqlTransactions as $transaction) {
+      if ($transaction["source"] != "rain") {
+
+        $from = persistGetUserdetailFromUsername($transaction["from_user"], "team_name");
+        if (!empty($from)) {
+          $transaction["from_user"] = $from;
+        }
+        
+        $to = persistGetUserdetailFromUsername($transaction["to_user"], "team_name");
+        if (!empty($to)) {
+          $transaction["to_user"] = $to;
+        }
+      }
+
+			array_push($transactions, $transaction);
+		}
+
+		echo array2csv($transactions);
+		die;
+	}/*else if ($selection == "getUsersAsCSV") {
 		download_send_headers("users_" . date("d-m-Y-H:i:s") . ".csv");
 		echo array2csv(mysqlSelectUsers());
 		die;

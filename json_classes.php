@@ -34,7 +34,8 @@
 	class BananaActionUser {
 		public $id = 0;
 		public $display_name  = "";
-		public $ad_user  = "";
+		public $ad_user_tt  = "";
+		public $ad_user_ama  = "";
 		public $bananas_to_spend = 0;
 		public $bananas_received = 0;
 		public $is_admin = 0;
@@ -44,10 +45,11 @@
 		public $team_name = "";
 		public $visibility = 1;
 		
-		function __construct($id, $display_name, $ad_user, $is_admin, $spend, $received, $token, $token_expiration, $token_duration, $team_name, $visibility) {
+		function __construct($id, $display_name, $ad_user_tt, $ad_user_ama, $is_admin, $spend, $received, $token, $token_expiration, $token_duration, $team_name, $visibility) {
 			$this->id = intval($id);
 			$this->display_name = $display_name;
-			$this->ad_user = $ad_user;
+			$this->ad_user_tt = $ad_user_tt;
+			$this->ad_user_ama = $ad_user_ama;
 			$this->is_admin = intval($is_admin);
 			$this->bananas_to_spend = intval($spend);
 			$this->bananas_received = intval($received);

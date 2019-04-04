@@ -15,9 +15,9 @@
 			return generateError($name, "login error (ldap)");
 		}
 		
-		if (!persistIsUserConfigured($jsonRQ)) {
-			return generateError($name, "login error (database)");
-		}
+		//if (!persistIsUserConfigured($jsonRQ)) {
+	//		return generateError($name, "login error (database)");
+	//	}
 		
 		$action = new BananaAction();
 		$action->actionname = $name;

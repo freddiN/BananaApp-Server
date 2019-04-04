@@ -23,21 +23,11 @@
 	function censorData($array_of_users) {
 		foreach ($array_of_users as $user) {
 			unset($user->id);// = null;
-			unset($user->ad_user);// = null;
-			unset($user->login_token);// = null;
-			unset($user->token_expiration_timestamp);// = null;
-			unset($user->token_duration);// = null;
-			
-/*
-				$user["id"],
-				$user["display_name"],
-				$user["ad_user"],
-				$user["is_admin"],
-				$user["bananas_to_spend"],
-				$user["bananas_received"],
-				$user["login_token"],
-				$user["token_expiration_timestamp"],
-				$user["token_duration"]));*/
+			unset($user->ad_user_tt);
+			unset($user->ad_user_ama);
+			unset($user->login_token);
+			unset($user->token_expiration_timestamp);
+			unset($user->token_duration);
 		}
 	}
 ?>

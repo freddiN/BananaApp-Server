@@ -181,8 +181,12 @@ if(guiShowSendBanana()) {
 	print "			<td><input type=\"text\" name=\"displayname\" value=\"\"/></td>\n";
 	print "		</tr>\n";
 	print "		<tr>\n";
-	print "			<td>AD name: </td>\n";
-	print "			<td><input type=\"text\" name=\"aduser\" value=\"\"/></td>\n";
+	print "			<td>AD user TT: </td>\n";
+	print "			<td><input type=\"text\" name=\"aduser_tt\" value=\"\"/></td>\n";
+	print "		</tr>\n";
+	print "		<tr>\n";
+	print "			<td>AD user AMA: </td>\n";
+	print "			<td><input type=\"text\" name=\"aduser_ama\" value=\"\"/></td>\n";
 	print "		</tr>\n";
 	print "		<tr>\n";
 	print "			<td>Team: </td>\n";
@@ -332,8 +336,14 @@ if(guiShowSendBanana()) {
 	print "<p>\n";
 	print "<form name=\"banana_rain\" method=\"post\">\n";
 	print "			<table id=\"loginTable\">\n";
-	print "				<tr><td>AD Username:</td><td><input type=\"text\" name=\"login\" placeholder=\"firstname.lastname\"/></td></tr>\n";
-	print "				<tr><td>AD Password:</td><td><input type=\"password\" name=\"password\"/></td></tr>\n";
+	print "				<tr><td>AD username:</td><td><input type=\"text\" name=\"login\"/></td></tr>\n";
+	print "				<tr><td>AD password:</td><td><input type=\"password\" name=\"password\"/></td></tr>\n";
+	print "				<tr><td>AD system:</td>\n";
+	print "			      <td><select name=\"ldap_system\">\n";	
+	print "			        <option>TravelTainment</option>\n";
+	print "			        <option>Amadeus</option>\n";
+	print "			      </select>\n";
+	print "	          </td></tr>\n";
 	print "			</table>\n";
 	print "			<button type=\"submit\" name=\"submit-button-login\">Login</button>\n";
 	print "		</form>\n";
@@ -413,8 +423,12 @@ if(isset($_POST["submit-button-send"])){
 		print "			<td>" . $response->action_result[0]->display_name . "</td>\n";
 		print "		</tr>\n";
 		print "		<tr>\n";
-		print "			<td>AD user: </td>\n";
-		print "			<td>" . $response->action_result[0]->ad_user . "</td>\n";
+		print "			<td>AD user TT: </td>\n";
+		print "			<td>" . $response->action_result[0]->ad_user_tt . "</td>\n";
+		print "		</tr>\n";
+		print "		<tr>\n";
+		print "			<td>AD user Ama: </td>\n";
+		print "			<td>" . $response->action_result[0]->ad_user_ama . "</td>\n";
 		print "		</tr>\n";
 		print "		<tr>\n";
 		print "			<td>Team: </td>\n";
@@ -565,7 +579,8 @@ if(isset($_POST["submit-button-send"])){
 		print "</table>\n";
 		print "<p id=\"csvexport\">\n";
 		print "  transaction count: " . count($response->action_result);
-		print "  <br/>CSV <a href=\"csv_export.php?function=getTransactionsAsCSV\" target=\"_blank\">Export</a>\n";
+		print "  <br/>CSV <a href=\"csv_export.php?function=getTransactionsAsCSV\" target=\"_blank\">Export</a> / ";
+    print "<a href=\"csv_export.php?function=getTransactionsAsCSVanonymized\" target=\"_blank\">Export anonymized</a>\n";
 		print "<br/><br/>Archive:<br/>\n";
 		
 		$files = array_diff(scandir("archive"), array('.', '..'));
@@ -608,7 +623,7 @@ if(isset($_POST["submit-button-send"])){
 	}
 
 	if ($ok == true) {
-		$createOk = persistCreateUser($_POST["displayname"], $_POST["aduser"], $_POST["team"], isset($_POST["isadmin"]), 10, 168, intval($_POST["visibility"]));
+		$createOk = persistCreateUser($_POST["displayname"], $_POST["aduser_tt"], $_POST["aduser_ama"], $_POST["team"], isset($_POST["isadmin"]), 10, 168, intval($_POST["visibility"]));
 		if($createOk == true){
 			print "<br><font color=\"green\"> Create-user result: ok</font><br>\n";
 		} else {
@@ -707,14 +722,16 @@ if(isset($_POST["submit-button-send"])){
 	$jsonRQ = new stdClass();
 	$jsonRQ->login = new stdClass();
 	
+	$ldap_system = htmlspecialchars($_POST["ldap_system"]);
 	$user = htmlspecialchars($_POST["login"]);
-	if (strpos($user, '@') !== false) {
+	if (strpos($user, '@') !== false && $ldap_system = "TravelTainment") {
 		$user_arr = explode("@", $user);
 		$user = $user_arr[0];
 	}
 
-	$user = $jsonRQ->login->user = $user;
-	$pass = $jsonRQ->login->pass = $_POST["password"];
+	$jsonRQ->login->user = $user;
+	$jsonRQ->login->pass = $_POST["password"];
+	$jsonRQ->login->system = $ldap_system;
   
 	$result_json = json_decode(handleActionLogin($jsonRQ));
 

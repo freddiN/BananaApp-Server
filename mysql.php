@@ -89,7 +89,7 @@
 		return $result;
 	}
 	
-	function mysqlUpdateUser($id, $display_name, $ad_user, $is_admin, $bananas_to_spend, $login_token, $token_expiration_timestamp, $token_duration, $visibility) {
+	function mysqlUpdateUser($id, $display_name, $ad_user_tt, $ad_user_ama, $is_admin, $bananas_to_spend, $login_token, $token_expiration_timestamp, $token_duration, $visibility) {
 		$result = false;
 		
 		$cfg = parse_ini_file("config.ini.php", true);
@@ -105,9 +105,15 @@
 			array_push($array_bind_value, $encryptiondata["pass"]);
 		}
 
-		if (!empty($ad_user)) {
+		if (!empty($ad_user_tt)) {
 			array_push($array_set, "ad_user = AES_ENCRYPT(?, ?)");
-			array_push($array_bind_value, $ad_user);
+			array_push($array_bind_value, $ad_user_tt);
+			array_push($array_bind_value, $encryptiondata["pass"]);
+		}
+		
+		if (!empty($ad_user_ama)) {
+			array_push($array_set, "ad_user_ama = AES_ENCRYPT(?, ?)");
+			array_push($array_bind_value, $ad_user_ama);
 			array_push($array_bind_value, $encryptiondata["pass"]);
 		}
 		
@@ -176,16 +182,16 @@
 		return $result;
 	}
 	
-	function mysqlInsertUser($display_name, $ad_user, $team_name, $is_admin, $bananas_to_spend, $login_token, $token_expiration_timestamp, $token_duration, $visibility) {
+	function mysqlInsertUser($display_name, $ad_user_tt, $ad_user_ama, $team_name, $is_admin, $bananas_to_spend, $login_token, $token_expiration_timestamp, $token_duration, $visibility) {
 		$result = false;
 		
 		$cfg = parse_ini_file("config.ini.php", true);
 		$mysqldata = $cfg["mysql"];
 		$encryptiondata = $cfg["encryption"];
 		
-		$insert = "INSERT into `Users` (display_name, ad_user, is_admin, bananas_to_spend, login_token, token_expiration_timestamp, token_duration, team_name, visibility) ";
+		$insert = "INSERT into `Users` (display_name, ad_user, ad_user_ama, is_admin, bananas_to_spend, login_token, token_expiration_timestamp, token_duration, team_name, visibility) ";
 		$insert .= " VALUES ";
-		$insert .= "(AES_ENCRYPT(?, ?), AES_ENCRYPT(?, ?), ?, ?, ?, ?, ?, AES_ENCRYPT(?, ?), ?);";
+		$insert .= "(AES_ENCRYPT(?, ?), AES_ENCRYPT(?, ?), AES_ENCRYPT(?, ?), ?, ?, ?, ?, ?, AES_ENCRYPT(?, ?), ?);";
 
 		$result = false;
 		try {
@@ -195,7 +201,8 @@
 			
 			$data = array(
 				$display_name, $encryptiondata["pass"],
-				$ad_user, $encryptiondata["pass"],
+				$ad_user_tt, $encryptiondata["pass"],
+				$ad_user_ama, $encryptiondata["pass"],
 				$is_admin,
 				$bananas_to_spend,
 				$login_token,
@@ -277,7 +284,7 @@
 		$mysqldata = $cfg["mysql"];
 		$encryptiondata = $cfg["encryption"];
 		
-		$vars = array($encryptiondata["pass"], $encryptiondata["pass"], $encryptiondata["pass"]);
+		$vars = array($encryptiondata["pass"], $encryptiondata["pass"], $encryptiondata["pass"], $encryptiondata["pass"]);
 		$where = "";
 		if (!empty($team_name)) {
 			$where = "having `team_name` = ?";	//supoorts alias instead of where
@@ -294,7 +301,8 @@
 				`token_expiration_timestamp`,
 				`token_duration`,
 				AES_DECRYPT(team_name, ?) as `team_name`,
-				`visibility` 
+				`visibility`,
+				AES_DECRYPT(ad_user_ama, ?) as `ad_user_ama`
 				FROM `Users` " . $where . "
 				ORDER BY display_name ASC;";
 

@@ -7,9 +7,13 @@
 	function persistIsUserConfigured($jsonRQ) {
 		$bRetun = false;
 		
+		//TODO: ama ad user testen
 		$users = persistGetUserList("");
 		foreach ($users as $useritem) {
-			if ($useritem->ad_user === $jsonRQ->login->user) {
+			if ($useritem->ad_user_tt === $jsonRQ->login->user) {
+				$bRetun = true;
+				break;
+			} else if ($useritem->ad_user_ama === $jsonRQ->login->user) {
 				$bRetun = true;
 				break;
 			}
@@ -28,6 +32,7 @@
 				$user["id"],
 				$user["display_name"],
 				$user["ad_user"],
+				$user["ad_user_ama"],
 				$user["is_admin"],
 				$user["bananas_to_spend"],
 				$user["bananas_received"],
@@ -58,18 +63,18 @@
 		$result = array();
 		$users = persistGetUserList("");
 		foreach ($users as $useritem) {
-			if ($useritem->ad_user === $jsonRQ->login->user) {
+			if ($useritem->ad_user_tt === $jsonRQ->login->user || $useritem->ad_user_ama === $jsonRQ->login->user) {
 				$id = $useritem->id;
 				$duration_in_hours = $useritem->token_duration;
 
 				$token = uuidSecure();
 				$new_time = date("d.m.Y H:i:s", strtotime(sprintf("+%d hours", intval($duration_in_hours))));
 
-				$success = mysqlUpdateUser($id , null, null, null, null, $token, $new_time, null, null);
+				$success = mysqlUpdateUser($id , null, null, null, null, null, $token, $new_time, null, null);
 				if ($success) {
 					array_push($result, new BananaLogin($token,$new_time));
 				}
-			}
+			} 
 		}
 		
 		unset($users);
@@ -81,7 +86,7 @@
 		$users = persistGetUserList("");
 		foreach ($users as $useritem) {
 			if ($useritem->login_token === $jsonRQ->login->token) {
-				array_push($result, mysqlUpdateUser($useritem->id, null, null, null, null, " ", " ", null, null));
+				array_push($result, mysqlUpdateUser($useritem->id, null, null, null, null, null, " ", " ", null, null));
 			}
 		}
 		
@@ -101,7 +106,7 @@
 	
 		$now_dt = new DateTime(date("d.m.Y H:i:s"));
 		foreach ($users as $useritem) {
-			$expire_dt = new DateTime($useritem->token_expiration_timestamp, new DateTimeZone("Europe/Berlin"));
+			$expire_dt = new DateTime($useritem->token_expiration_timestamp);
 
 			if (isset($jsonRQ->login->token) && $useritem->login_token === $jsonRQ->login->token && 
 				$now_dt < $expire_dt) {
@@ -144,8 +149,10 @@
 			if ($useritem->display_name === $display_name) {
 				if ($what == "id") {
 					$result = $useritem->id;
-				} else if ($what == "ad_user") {
-					$result = $useritem->ad_user;
+				} else if ($what == "ad_user_tt") {
+					$result = $useritem->ad_user_tt;
+				} else if ($what == "ad_user_ama") {
+					$result = $useritem->ad_user_ama;
 				} else if ($what == "is_admin") {
 					$result = $useritem->is_admin;
 				} else if ($what == "login_token") {
@@ -364,9 +371,14 @@
 	function persistEditUser($jsonRQ) {
 		$result = array();
 
-		$new_ad = "";
-		if (!empty($jsonRQ->action_request->ad_user)) {
-			$new_ad = $jsonRQ->action_request->ad_user;
+		$new_ad_tt = "";
+		if (!empty($jsonRQ->action_request->ad_user_tt)) {
+			$new_ad_tt = $jsonRQ->action_request->ad_user_tt;
+		}
+		
+		$new_ad_ama = "";
+		if (!empty($jsonRQ->action_request->ad_user_ama)) {
+			$new_ad_ama = $jsonRQ->action_request->ad_user_ama;
 		}
 		
 		$new_admin = "";
@@ -405,7 +417,8 @@
 				array_push($result, mysqlUpdateUser(
 					$useritem->id, 
 					"", //display name, nicht ändern
-					$new_ad,
+					$new_ad_tt,
+					$new_ad_ama,
 					$new_admin, 
 					$new_spend,
 					$new_token, 
@@ -512,12 +525,12 @@
 		return false;
 	}
 
-	function persistCreateUser($display_name, $ad_user, $team, $is_admin=0, $to_spend=10, $token_duration=168, $visibility=1) {
+	function persistCreateUser($display_name, $ad_user_tt, $ad_user_ama, $team, $is_admin=0, $to_spend=10, $token_duration=168, $visibility=1) {
 		if (empty($display_name)) {
 			return FALSE;
 		}
 		
-		if (empty($ad_user)) {
+		if (empty($ad_user_tt) && empty($ad_user_ama)) {
 			return FALSE;
 		}
 		
@@ -529,7 +542,7 @@
 			return FALSE;
 		}
 		
-		return mysqlInsertUser($display_name, $ad_user, $team, $is_admin, $to_spend, "", "", $token_duration, $visibility);
+		return mysqlInsertUser($display_name, $ad_user_tt, $ad_user_ama, $team, $is_admin, $to_spend, "", "", $token_duration, $visibility);
 	}
 	
 	function persistDeleteUser($display_name, $team) {
