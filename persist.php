@@ -489,6 +489,13 @@
     }
 	
 	function persistSendMessage($from, $to, $comment, $message_id) {
+		$visibility_of_to_user = persistGetUserdetailFromUsername($to, "visibility");		
+		if ($visibility_of_to_user == "0") {
+			sendMessageFirebase($from, "(anonymized)", $comment, $message_id);	
+		} else {
+			sendMessageFirebase($from, $to, $comment, $message_id);	
+		}
+						
 		//sendMessagePushy($from, $to, $comment, $message_id);
 		sendMessageFirebase($from, $to, $comment, $message_id);	
 	}
