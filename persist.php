@@ -494,10 +494,7 @@
 			sendMessageFirebase($from, "(anonymized)", $comment, $message_id);	
 		} else {
 			sendMessageFirebase($from, $to, $comment, $message_id);	
-		}
-						
-		//sendMessagePushy($from, $to, $comment, $message_id);
-		sendMessageFirebase($from, $to, $comment, $message_id);	
+		}	
 	}
 	
 	function persistGetStats($team) {
